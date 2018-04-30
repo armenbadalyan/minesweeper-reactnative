@@ -26,6 +26,11 @@ public class MainApplication extends NavigationApplication {
           new MainReactPackage()
       );
     }
+
+    @Override
+    protected String getJSMainModuleName() {
+      return "index";
+    }
   };
 
   @Override

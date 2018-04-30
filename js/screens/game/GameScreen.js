@@ -18,17 +18,6 @@ const LOST = 'lost';
 
 export default class GameScreen extends Component {
 
-    static navigatorStyle = {
-        navBarBackgroundColor: '#C0C0C0'
-    };
-
-    static navigatorButtons = {
-        leftButtons: [{
-            icon: require('../../assets/navicon_menu.png'),
-            id: 'menu'
-        }]
-    };
-
     constructor(props) {
         super(props);
         this.state = this.getInitialGameState();

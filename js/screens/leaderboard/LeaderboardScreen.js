@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import { View, Text, Image, FlatList} from 'react-native';
+import { View, Text, Image, FlatList } from 'react-native';
 import User from './user.component.js';
 import styles from './styles.js';
 
-class Leaderboard extends Component {
+export default class LeaderboardScreen extends Component {
 	static navigationOptions = {};
 
 	constructor(props) {
@@ -27,24 +27,22 @@ class Leaderboard extends Component {
 			})
 	}
 
-	itemRenderer({item, index}) {
+	itemRenderer({ item, index }) {
 		return <User user={item} index={index} />
-	} 
-	
+	}
+
 
 	getKey(item, index) {
 		return index;
 	}
 
-    render() {
-    	return (<View style={styles.leaderboard}>
-	    			<FlatList
-	  					data={this.state.users}
-	  					keyExtractor={this.getKey}
-	  					renderItem={this.itemRenderer}
-					/>
-    			</View>);
-    }
+	render() {
+		return (<View style={styles.leaderboard}>
+			<FlatList
+				data={this.state.users}
+				keyExtractor={this.getKey}
+				renderItem={this.itemRenderer}
+			/>
+		</View>);
+	}
 }
-
-export default Leaderboard;

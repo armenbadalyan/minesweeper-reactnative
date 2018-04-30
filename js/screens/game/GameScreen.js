@@ -16,9 +16,7 @@ const IN_PROGRESS = 'inprogress';
 const WON = 'won';
 const LOST = 'lost';
 
-export let rootNavigator = null;
-
-export class Game extends Component {
+export default class GameScreen extends Component {
 
     static navigatorStyle = {
         navBarBackgroundColor: '#C0C0C0'
@@ -37,10 +35,6 @@ export class Game extends Component {
         this.handleCellClick = this.handleCellClick.bind(this);
         this.handleCellAltClick = this.handleCellAltClick.bind(this);
         this.handleGameButtonClick = this.handleGameButtonClick.bind(this);
-        this.props.navigator.setOnNavigatorEvent(this.handleNavigatorEvent.bind(this));
-
-        rootNavigator = this.props.navigator;
-
     }
 
     getInitialGameState() {
@@ -397,16 +391,6 @@ export class Game extends Component {
             game: state.game,
             field: state.field
         });
-    }
-
-    handleNavigatorEvent(event) {
-        if (event.id === 'menu') {
-            this.props.navigator.toggleDrawer({
-                title: 'Leaderboard',
-                side: 'left',
-                animated: true
-            });
-        }        
     }
 
     render() {

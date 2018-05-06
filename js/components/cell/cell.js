@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { View, Image, TouchableHighlight, StyleSheet } from 'react-native';
+import { View, Image, TouchableWithoutFeedback, StyleSheet } from 'react-native';
 import Icon from '../icon/icon.js';
 import Styles from './styles.js';
 
@@ -28,34 +28,54 @@ export class Cell extends PureComponent {
         this.handleLongPress = this.handleLongPress.bind(this);
     }
 
-    handlePress() {    	
+    handlePress() {
         if (this.props.onCellClick) {
-            this.props.onCellClick(this.props.cellId);
+            this.props.onCellClick(this.props.data.id);
         }
     }
 
-    handleLongPress(e) {        
+    handleLongPress() {
         if (this.props.onCellAltClick) {
-            this.props.onCellAltClick(this.props.cellId);
+            this.props.onCellAltClick(this.props.data.id);
         }
     }
 
     render() {
-        let className = this.props.className || '',
-            ownStyle = StyleSheet.create({
-            	layout: {
-            		width: this.props.width,
-                	height: this.props.height,
-                	left: this.props.col * this.props.width,
-                	top: this.props.row * this.props.height
-            	}                
-        	}),
-        	style = this.props.style || [];
 
-        return <TouchableHighlight style={[Styles.cell, ...style, ownStyle.layout]} onPress={this.handlePress} onLongPress={this.handleLongPress}>
-	        		<View style={{flex:1}}>
-						<Icon style={Styles.cellIcon} source={icons[this.props.icon]} />			
-					</View>
-				</TouchableHighlight>
+        const cell = this.props.data;
+        const styles = [Styles.cell, this.props.layoutStyles];
+
+
+        let icon = '';
+
+        if (cell.closed) {
+            if (cell.flagged) {
+                icon = 'flag';
+            }
+        }
+        else {
+            styles.push(Styles.openCell);
+
+            if (cell.exploded) {
+                icon = 'mine'
+                styles.push(Styles.explodedCell);
+            }
+            else if (cell.mistake) {
+                icon = 'mine-mistake';
+            }
+            else if (cell.mine) {
+                icon = 'mine';
+            }
+            else if (cell.minesAround > 0) {
+                icon = 'mine-' + cell.minesAround;
+            }
+        }
+
+        return (<TouchableWithoutFeedback  onPress={this.handlePress} onLongPress={this.handleLongPress}>
+            <View style={styles}>
+                <Icon style={Styles.cellIcon} source={icons[icon]} />			
+            </View>
+        </TouchableWithoutFeedback>);
+
     }
 }

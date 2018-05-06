@@ -4,7 +4,6 @@ import { BG_MAIN_COLOR, BG_ALT_COLOR, BORDER1_COLOR, BORDER2_COLOR } from '../..
 const Styles = StyleSheet.create({
   cell: {
     position: 'absolute',
-    backgroundColor: BG_MAIN_COLOR,
     borderWidth: 3,
     borderStyle: 'solid',
     borderLeftColor: BORDER1_COLOR,

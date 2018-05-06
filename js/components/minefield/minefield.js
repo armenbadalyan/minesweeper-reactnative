@@ -1,31 +1,40 @@
 import React, { PureComponent } from 'react';
-import { OpenCell, ClosedCell } from '../cell';
-import {  
-  View
+import { Cell } from '../cell';
+
+import {
+    View,
+    StyleSheet
 } from 'react-native';
-import commonStyles from '../../shared/styles.js'
+import commonStyles from '../../shared/styles.js';
+
 
 class Minefield extends PureComponent {
+
+    cellLayouts = {};
 
     constructor(props) {
         super(props);
 
         this.state = {
-            cellWidth: 0,
-            cellHeight: 0,
-            fieldHeight: 0
+            cellWidth: 20,
+            cellHeight: 20,
+            fieldWidth: 320,
+            fieldHeight: 320
         }
 
         this.fieldDimensions = {
-            width: 0,
-            height: 0
+            width: 250,
+            height: 250
         }
 
-        this.handleLayoutChange = this.handleLayoutChange.bind(this);
+        this.calculateCellLayouts(props.field, 20, 20);
+        //this.handleLayoutChange = this.handleLayoutChange.bind(this);
     }
 
     componentWillReceiveProps(nextProps) {
-        this.calculateCellDimensions(this.fieldDimensions.width, this.fieldDimensions.height, nextProps.field.rows, nextProps.field.cols);
+        if (nextProps.field.rows !== this.props.field.rows || nextProps.field.cols !== this.props.field.cols) {
+            this.calculateCellLayouts(nextProps.field, this.state.cellWidth, this.state.cellHeight);
+        }
     }
 
     handleLayoutChange(event) {
@@ -36,56 +45,66 @@ class Minefield extends PureComponent {
 
     calculateCellDimensions(fieldWidth, fieldHeight, rows, cols) {
         let cellSize = fieldWidth / cols;
-        
+
+        this.calculateCellLayouts(this.props.field, cellSize, cellSize);
+
         this.setState({
-        	cellWidth: cellSize,
+            cellWidth: cellSize,
             cellHeight: cellSize,
+            fieldWidth: cellSize * cols,
             fieldHeight: cellSize * rows
-        })
+        });   
     }
 
-    render() {       
+    calculateCellLayouts = (field, cellWidth, cellHeight) => {
+        const cells = field.cells;
+        const cellKeys = Object.keys(cells)
+        this.cellLayouts = {};
+        cellKeys.forEach(key => {
+            this.cellLayouts[key] = StyleSheet.create(
+                {
+                    layout: {
+                        width: cellWidth,
+                        height: cellHeight,
+                        left: cells[key].col * cellWidth,
+                        top: cells[key].row * cellHeight
+                    }
+                }
+            );
+        });
+    }
 
-    	let cells = null,
-    		fieldStyles =  {
-    			height: this.state.fieldHeight
-    		};
+    render() {
 
-        if (this.state.cellWidth && this.state.cellHeight) {            
+        let cells = null,
+            fieldStyles = {
+                height: this.state.fieldHeight,
+                flexDirection: 'row',
+                flexWrap: 'wrap'
+            };
+        console.log('minefield render');
+        const time = Date.now();
+        if (this.state.cellWidth && this.state.cellHeight) {
             cells = Object.keys(this.props.field.cells).map((id) => {
                 const cell = this.props.field.cells[id];
-                if (cell.closed) {
-                    return <ClosedCell
-                        key={cell.id}
-                        cellId={cell.id}
-                        row={cell.row}
-                        col={cell.col}
-                        flagged={cell.flagged}                        
-                        width={this.state.cellWidth}
-                        height={this.state.cellHeight}
-                        onCellClick={this.props.onCellClick} onCellAltClick={this.props.onCellAltClick} />
-                } else {
-                    return <OpenCell
-                        key={cell.id}
-                        cellId={cell.id}
-                        row={cell.row}
-                        col={cell.col}
-                        exploded={cell.exploded}       
-                        mistake={cell.mistake}                 
-                        minesAround={cell.minesAround}
-                        hasMine={cell.mine}
-                        width={this.state.cellWidth}
-                        height={this.state.cellHeight}
-                        onCellClick={this.props.onCellClick} onCellAltClick={this.props.onCellAltClick} />
-                }
+
+                return <Cell
+                    key={cell.id}
+                    data={cell}
+                    layoutStyles={this.cellLayouts[cell.id].layout}
+                    onCellClick={this.props.onCellClick} onCellAltClick={this.props.onCellAltClick} />
             });
         }
 
-        return <View style={commonStyles.border}>
-        			<View style={fieldStyles} className="minefield" onLayout={this.handleLayoutChange}>{cells}</View>
-            	</View>;
+        console.log('Minefield render', Date.now() - time);
 
-        
+        return <View style={commonStyles.border}>
+            <View style={fieldStyles} className="minefield">
+                {!!(this.state.fieldWidth && this.state.fieldHeight) && cells}
+            </View>
+        </View>;
+
+
     }
 }
 

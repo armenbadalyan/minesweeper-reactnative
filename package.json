@@ -7,9 +7,14 @@
     "test": "jest"
   },
   "dependencies": {
+    "immutability-helper": "^2.7.0",
     "react": "16.3.1",
     "react-native": "0.55.3",
-    "react-navigation": "^1.5.11"
+    "react-native-svg": "https://github.com/maxkomarychev/react-native-svg#touches-group-use",
+    "react-navigation": "^1.5.11",
+    "react-redux": "^5.0.7",
+    "redux": "^4.0.0",
+    "redux-thunk": "^2.2.0"
   },
   "devDependencies": {
     "babel-eslint": "^8.2.3",
@@ -24,8 +29,8 @@
     "preset": "react-native"
   },
   "rnpm": {
-		"assets": [
-			"resources/fonts"
-		]
-	}
+    "assets": [
+      "resources/fonts"
+    ]
+  }
 }

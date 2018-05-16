@@ -23,6 +23,27 @@ const initialState = {
     }
 };
 
+const mines = (function () {
+    let cells = {};
+    for(let i=0; i<16; i++) {
+        for(let j=0; j<16; j++) {
+            cells[i+':'+j] = {
+                id: i + ':' + j,
+                row: i,
+                col: j,
+                closed: false,
+                flagged: false,
+                mine: true,
+                exploded: false,
+                mistake: false,
+                minesAround: 0
+            }
+        }
+    }
+    return cells;
+})();
+
+
 //reducer
 export default (state = initialState, action) => {
     const payload = action.payload;
@@ -138,6 +159,19 @@ export function cellAltClick(id) {
             }
         });
     }    
+}
+
+export function convertToMines() {
+    return {
+        type: UPDATE_GAME,
+        payload: {
+            field: {
+                rows: 16,
+                cols: 16,
+                cells: mines
+            }
+        }
+    };
 }
 
 function plantMines(rows, cols, mineCount) {

@@ -4,12 +4,6 @@ import { BG_MAIN_COLOR, BG_ALT_COLOR, BORDER1_COLOR, BORDER2_COLOR } from '../..
 const Styles = StyleSheet.create({
   cell: {
     position: 'absolute',
-    borderWidth: 3,
-    borderStyle: 'solid',
-    borderLeftColor: BORDER1_COLOR,
-    borderTopColor: BORDER1_COLOR,
-    borderRightColor: BORDER2_COLOR,
-    borderBottomColor: BORDER2_COLOR,
     padding: 3
   },
   openCell: {    
@@ -17,7 +11,8 @@ const Styles = StyleSheet.create({
     borderBottomWidth: 1,    
     borderBottomColor: BG_ALT_COLOR,
     borderLeftWidth: 1,    
-    borderLeftColor: BG_ALT_COLOR    
+    borderLeftColor: BG_ALT_COLOR ,
+    backgroundColor: '#DDD'
   },
   explodedCell: {
     backgroundColor: '#FC371E'

@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import { View } from 'react-native';
 import { connect } from 'react-redux';
-import { initGame, cellClick, cellAltClick} from '../../modules/game';
+import { initGame, cellClick, cellAltClick, convertToMines} from '../../modules/game';
 import Minefield from '../../components/minefield/minefield';
 import StatBoard from '../../components/statboard/statboard';
+import Button from '../../components/Button';
 import styles from './styles.js';
 import commonStyles from '../../shared/styles.js';
 //import './game.css';
@@ -22,6 +23,9 @@ const mapDispatchToProps = dispatch => ({
     },
     cellAltClick: (id) => {
         dispatch(cellAltClick(id))
+    },
+    convertToMines: () => {
+        dispatch(convertToMines());
     }
 });
 
@@ -64,12 +68,17 @@ export class GameScreen extends Component {
         this.props.cellAltClick(id);
     }
 
+    handleConvertToMines = () => {
+        this.props.convertToMines();
+    }
+
     render() {
         return (
             <View style={styles.game}>
                 <StatBoard game={this.props.game.game} flaggedMines={this.countFlaggedMines(this.props.game.field)} onGameButtonClick={this.handleGameButtonClick} />
                 { /*<div className="game__separator" />*/ }
                 <Minefield field={this.props.game.field} onCellClick={this.handleCellClick}  onCellAltClick={this.handleCellAltClick} mines="10" />
+                <Button title="Convert to mines" onPress={this.handleConvertToMines} /> 
             </View>
         );
     }

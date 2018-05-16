@@ -6,22 +6,19 @@ import {
 
 class Icon extends PureComponent {
 
-	constructor(props) {
-		super(props);
-
-		this.iconStyles = StyleSheet.create({
-			icon: {
-				flex:1,
-				resizeMode: 'contain',
-				width: undefined,
-				height: undefined
-			}
-		});
-	}
-
 	render() {
-		return <Image style={[this.props.style, this.iconStyles.icon]} fadeDuration={0} source={this.props.source} /> 
+		return !!this.props.source && <Image width={this.props.width}
+			height={this.props.height} 
+			style={[this.props.style, styles.icon]} 
+			fadeDuration={0} 
+			source={{uri: this.props.source}} /> 
 	}
 }
 
 export default Icon;
+
+const styles = StyleSheet.create({
+	icon: {
+		flex:1
+	}
+});

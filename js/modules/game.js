@@ -4,15 +4,19 @@
 const INIT_GAME = 'game/INIT_GAME';
 const UPDATE_GAME = 'game/UPDATE_GAME';
 
-const NEW = 'new';
-const IN_PROGRESS = 'inprogress';
-const WON = 'won';
-const LOST = 'lost';
+
+export const GameStatus = {
+    NEW: 'new',
+    IN_PROGRESS: 'inprogress',
+    WON: 'won',
+    LOST: 'lost'
+}
+
 
 // default state
 const initialState = {
     game: {
-        status: NEW,
+        status: GameStatus.NEW,
         startedAt: null,
         totalMines: 0
     },
@@ -25,9 +29,9 @@ const initialState = {
 
 const mines = (function () {
     let cells = {};
-    for(let i=0; i<16; i++) {
-        for(let j=0; j<16; j++) {
-            cells[i+':'+j] = {
+    for (let i = 0; i < 16; i++) {
+        for (let j = 0; j < 16; j++) {
+            cells[i + ':' + j] = {
                 id: i + ':' + j,
                 row: i,
                 col: j,
@@ -53,7 +57,7 @@ export default (state = initialState, action) => {
                 ...state,
                 game: {
                     ...state.game,
-                    status: NEW,
+                    status: GameStatus.NEW,
                     startedAt: null,
                     totalMines: payload.mines
                 },
@@ -96,11 +100,11 @@ export function cellClick(id) {
         const start = Date.now();
         const game = getState().game.game,
             field = getState().game.field,
-            startedAt = game.status === NEW ? new Date() : game.startedAt,
+            startedAt = game.status === GameStatus.NEW ? new Date() : game.startedAt,
             cell = field.cells[id];
 
         let newField,
-            newStatus = IN_PROGRESS;
+            newStatus = GameStatus.IN_PROGRESS;
 
         if (cell.closed) {
             newField = openCell(cell, field);
@@ -110,10 +114,10 @@ export function cellClick(id) {
 
         newStatus = validateGameStatus(newField);
 
-        if (newStatus === LOST) {
+        if (newStatus === GameStatus.LOST) {
             newField = findMistakesAndUncoverMines(newField);
         }
-        else if (newStatus === WON) {
+        else if (newStatus === GameStatus.WON) {
             newField = flagRemainingMines(newField);
         }
 
@@ -134,11 +138,11 @@ export function cellAltClick(id) {
     return (dispatch, getState) => {
         const game = getState().game.game,
             field = getState().game.field,
-            startedAt = game.status === NEW ? new Date() : game.startedAt,
+            startedAt = game.status === GameStatus.NEW ? new Date() : game.startedAt,
             cell = field.cells[id];
 
         let newField = field,
-            newStatus = IN_PROGRESS;
+            newStatus = GameStatus.IN_PROGRESS;
 
         if (cell.closed) {
             newField = {
@@ -158,7 +162,7 @@ export function cellAltClick(id) {
                 field: newField
             }
         });
-    }    
+    }
 }
 
 export function convertToMines() {
@@ -315,7 +319,7 @@ function openCell(cell, field) {
                 let changedCells = getNeighbourCells(cell, newField)
                     .filter(cell => cell.closed && !cell.flagged)
                     .map(cell => {
-                        const newCell = setCellAttribute(cell, 'closed', false);                        
+                        const newCell = setCellAttribute(cell, 'closed', false);
                         cellStack.push(cell);
                         return newCell;
                     });
@@ -357,7 +361,7 @@ function validateGameStatus(field) {
     });
 
     if (hasExploded) {
-        return LOST
+        return GameStatus.LOST
     } else {
         const allMinesFound = cellKeys
             .filter(key => {
@@ -368,9 +372,9 @@ function validateGameStatus(field) {
             });
 
         if (allMinesFound) {
-            return WON
+            return GameStatus.WON
         } else {
-            return IN_PROGRESS;
+            return GameStatus.IN_PROGRESS;
         }
     }
 }

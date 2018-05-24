@@ -6,8 +6,6 @@ import Minefield from '../../components/minefield/minefield';
 import StatBoard from '../../components/statboard/statboard';
 import Button from '../../components/Button';
 import styles from './styles.js';
-import commonStyles from '../../shared/styles.js';
-//import './game.css';
 
 
 const mapStateToProps = state => ({
@@ -77,8 +75,8 @@ export class GameScreen extends Component {
             <View style={styles.game}>
                 <StatBoard game={this.props.game.game} flaggedMines={this.countFlaggedMines(this.props.game.field)} onGameButtonClick={this.handleGameButtonClick} />
                 { /*<div className="game__separator" />*/ }
-                <Minefield field={this.props.game.field} onCellClick={this.handleCellClick}  onCellAltClick={this.handleCellAltClick} mines="10" />
-                <Button title="Convert to mines" onPress={this.handleConvertToMines} /> 
+                <Minefield field={this.props.game.field} status={this.props.game.game.status} onCellClick={this.handleCellClick}  onCellAltClick={this.handleCellAltClick} mines="10" />
+               { /*<Button title="Convert to mines" onPress={this.handleConvertToMines} /> */ }
             </View>
         );
     }

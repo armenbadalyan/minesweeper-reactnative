@@ -1,18 +1,84 @@
 import React, { PureComponent } from 'react';
-import Canvas, { Image as CanvasImage } from 'react-native-canvas';
+import { WebGLView } from "react-native-webgl";
 import { Cell } from '../cell';
-import {mine} from '../../assets/base64Images.json';
+import { mine } from '../../assets/base64Images.json';
+import { GameStatus } from '../../modules/game';
+import TextManager from '../../shared/texture-manager';
 
 import {
     View,
     Image,
     TouchableWithoutFeedback,
-    Platform,
-    StyleSheet,
+    StyleSheet
 } from 'react-native';
 import commonStyles from '../../shared/styles.js';
+import TextureManager from '../../shared/texture-manager';
 
 const FIELD_BORDER_WIDTH = 6;
+const textures = [{
+    name: 'field_assets',
+    source: 'field_assets'
+}];
+const assets = {
+    mine1: {
+        offsetX: 0.0,
+        offsetY: 0.0
+    },
+    mine2: {
+        offsetX: 0.25,
+        offsetY: 0.0
+    },
+    mine3: {
+        offsetX: 0.5,
+        offsetY: 0.0
+    },
+    mine4: {
+        offsetX: 0.75,
+        offsetY: 0.0
+    },
+    mine5: {
+        offsetX: 0.0,
+        offsetY: 0.25
+    },
+    mine6: {
+        offsetX: 0.25,
+        offsetY: 0.25
+    },
+    mine7: {
+        offsetX: 0.5,
+        offsetY: 0.25
+    },
+    mine8: {
+        offsetX: 0.75,
+        offsetY: 0.25
+    },
+    mine: {
+        offsetX: 0.0,
+        offsetY: 0.5
+    },
+    mineMistake: {
+        offsetX: 0.25,
+        offsetY: 0.5
+    },
+    mineExploded: {
+        offsetX: 0.5,
+        offsetY: 0.5
+    },
+    flag: {
+        offsetX: 0.75,
+        offsetY: 0.5
+    },
+    empty: {
+        offsetX: 0.0,
+        offsetY: 0.75
+    },
+    closed: {
+        offsetX: 0.25,
+        offsetY: 0.75
+    }
+
+};
+const assetsPerRow = 4;
 
 export default class Minefield extends PureComponent {
 
@@ -20,6 +86,9 @@ export default class Minefield extends PureComponent {
     canvas = null;
     imagesLoaded = false;
     mineImage;
+    gl = null;
+    texturesLoaded = false;
+    program;
 
     constructor(props) {
         super(props);
@@ -31,34 +100,14 @@ export default class Minefield extends PureComponent {
             fieldHeight: 0
         }
 
-        //this.calculateCellLayouts(props.field, 20, 20);
         //this.handleLayoutChange = this.handleLayoutChange.bind(this);
     }
-
-
-    /*setRef = (canvas) => {
-        if (!this.canvas) {
-            this.canvas = canvas;
-            this.loadImages();
-        }        
-    }
-
-    loadImages = () => {
-        this.mineImage = new CanvasImage(this.canvas);
-        this.mineImage.src = mine;
-        this.mineImage.addEventListener('load', () => {
-            this.imagesLoaded = true;
-        })
-    }*/
-
     UNSAFE_componentWillReceiveProps(nextProps) {
         if (nextProps.field.rows !== this.props.field.rows || nextProps.field.cols !== this.props.field.cols) {
             this.calculateCellLayouts(nextProps.field, this.state.cellWidth, this.state.cellHeight);
         }
 
-        /*if (nextProps.field !== this.props.field) {
-            this.renderField(nextProps.field);
-        }*/
+        this.renderField(nextProps.field, nextProps.status);
     }
 
     handleLayoutChange = (event) => {
@@ -127,57 +176,227 @@ export default class Minefield extends PureComponent {
         }
     }
 
-    /*renderField(field) {
-        if (this.canvas && this.imagesLoaded) {
-            this.canvas.width = this.state.fieldWidth;
-            this.canvas.height = this.state.fieldHeight;
-            Object.values(field.cells).forEach((cell) => {
-                this.renderCell(cell)
-            });
+    onContextCreate = (gl) => {
+        this.gl = gl;
+
+        TextManager.loadTextures(gl, textures).then(() => {
+            this.texturesLoaded = true;
+            this.createShaders();
+            this.renderField(this.props.field, this.props.status);
+        }).catch(err => {
+            console.log(err);
+        });
+    }
+
+    initField() {
+        if (this.gl) {
+            this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
         }
     }
 
-    renderCell(cell) {
-        const ctx = this.canvas.getContext('2d');
-        const x = cell.col * this.state.cellWidth;
-        const y = cell.row * this.state.cellHeight;
-        let fill,
-            image;
+    createShaders() {
+        const gl = this.gl;
+        const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+        gl.shaderSource(
+            vertexShader,
+            `\
+            attribute vec2 aVertexPosition;
+            //attribute vec4 color;
+            attribute vec2 aTexCoord;
 
+            //varying vec4 vColor;
+            varying vec2 vTexCoord;
 
+            void main() {
+                gl_Position = vec4(aVertexPosition, 0.0, 1.0);
+                //vColor = color;
+                vTexCoord = aTexCoord;
+            }
+            `
+        );
+        gl.compileShader(vertexShader);
+
+        const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+        gl.shaderSource(
+            fragmentShader,
+            `\
+            #ifdef GL_ES
+            precision highp float;
+            #endif
+            
+            //varying vec4 vColor;
+
+            // Passed in from the vertex shader.
+            varying vec2 vTexCoord;
+
+            // sampler
+            uniform sampler2D t;
+            
+            void main() {
+                gl_FragColor = texture2D(t, vTexCoord);
+            }`
+        );
+        gl.compileShader(fragmentShader);
+        this.program = gl.createProgram();
+        gl.attachShader(this.program, vertexShader);
+        gl.attachShader(this.program, fragmentShader);
+        gl.linkProgram(this.program);
+        gl.useProgram(this.program);
+
+    }
+
+    renderField(field, status) {
+        const gl = this.gl;
+        const program = this.program;
+
+        if (gl && this.texturesLoaded) {
+
+            if (status === GameStatus.NEW) {
+                this.initField();
+            }
+
+            //this.cellGeometry = new Float32Array([]);
+            //this.cellColors = new Float32Array([]);
+
+            let cellGeometry = [];
+            let colors = [];
+            let texturePoints = [];
+
+            Object.values(field.cells).forEach((cell) => {
+                this.renderCell(cell, cellGeometry, colors, texturePoints)
+            });
+
+            // Create an empty buffer object and store vertex data
+            const vbuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, vbuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(cellGeometry), gl.STATIC_DRAW);
+
+            // Create an empty buffer object and store color data
+            /*const colorBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);*/
+
+            // Create an empty buffer object and store color data
+            const textureBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, textureBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texturePoints), gl.STATIC_DRAW);
+
+            const itemSize = 2;
+            const numItems = cellGeometry.length / itemSize;
+
+            /*program.uColor = gl.getUniformLocation(program, "uColor");
+            gl.uniform4fv(program.uColor, [0, 0, 1, 1]);*/
+
+            // vertex position attribute
+            gl.bindBuffer(gl.ARRAY_BUFFER, vbuffer);
+            program.aVertexPosition = gl.getAttribLocation(program, "aVertexPosition");
+            gl.enableVertexAttribArray(program.aVertexPosition);
+            gl.vertexAttribPointer(program.aVertexPosition, itemSize, gl.FLOAT, false, 0, 0);
+
+            // color attribute
+            /*gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+            program.color = gl.getAttribLocation(program, "color");
+            gl.vertexAttribPointer(program.color, 4, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(program.color);*/
+
+            // texture coordinate attribute
+            gl.bindBuffer(gl.ARRAY_BUFFER, textureBuffer);
+            program.textureCoord = gl.getAttribLocation(program, "aTexCoord");
+            gl.vertexAttribPointer(program.textureCoord, 2, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(program.textureCoord);
+
+            const uSampler = gl.getUniformLocation(program, "t");
+
+            // map the texture
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, TextureManager.getTexture('field_assets'));
+            gl.uniform1i(uSampler, 0);
+
+            gl.drawArrays(gl.TRIANGLES, 0, numItems);
+
+            const rngl = this.gl.getExtension("RN");
+            rngl.endFrame();
+        }
+    }
+
+    renderCell(cell, vertices, colors, textureCoords) {
+
+        const x = this.toGLX(cell.col * this.state.cellWidth);
+        const y = this.toGLY(cell.row * this.state.cellHeight);
+        const cw = this.scaleToGLWidth(this.state.cellWidth);
+        const ch = this.scaleToGLHeight(this.state.cellHeight);
+
+        let asset;
+
+        vertices.push(x, y,
+            x + cw, y,
+            x, y - ch,
+            x, y - ch,
+            x + cw, y,
+            x + cw, y - ch);
+
+        //console.log(vertices);
 
         if (cell.closed) {
             if (cell.flagged) {
-                fill = 'green';
+                asset = assets['flag'];
+            }
+            else {
+                asset  = assets['closed'];
             }
         }
         else {
-            fill = 'gray';
             if (cell.exploded) {
-                fill = 'red';
+                asset = assets['mineExploded'];
             }
             else if (cell.mistake) {
-                fill = 'red';
+                asset = assets['mineMistake'];
             }
             else if (cell.mine) {
-                fill = 'black';
-                image = this.mineImage;
+                asset = assets['mine'];
             }
             else if (cell.minesAround > 0) {
-                fill = 'blue'
+                asset = assets['mine' + cell.minesAround];
+            }
+            else {
+                asset = assets['empty'];
             }
         }
 
-        if (fill) {
-            ctx.fillStyle = fill;
-            ctx.fillRect(x, y, this.state.cellWidth, this.state.cellHeight);
-        }
+        textureCoords.push(
+            this.getAssetX(0.0, asset), this.getAssetY(0.0, asset),
+            this.getAssetX(1.0, asset), this.getAssetY(0.0, asset),
+            this.getAssetX(0.0, asset), this.getAssetY(1.0, asset),
 
-        if (image) {
-            ctx.drawImage(image, x, y, this.state.cellWidth, this.state.cellHeight);
-        }
+            this.getAssetX(0.0, asset), this.getAssetY(1.0, asset),
+            this.getAssetX(1.0, asset), this.getAssetY(0.0, asset),
+            this.getAssetX(1.0, asset), this.getAssetY(1.0, asset)
+        );
+    }
 
-    }*/
+    getAssetX(x, asset) {
+        return x / assetsPerRow + asset.offsetX;
+    }
+
+    getAssetY(y, asset) {
+        return y / assetsPerRow + asset.offsetY;
+    }
+
+    toGLX(x) {
+        return 2 * x / this.state.fieldWidth - 1;
+    }
+
+    toGLY(y) {
+        return 1 - 2 * y / this.state.fieldHeight;
+    }
+
+    scaleToGLWidth(width) {
+        return (2 * width) / this.state.fieldWidth;
+    }
+
+    scaleToGLHeight(height) {
+        return (2 * height) / this.state.fieldHeight;
+    }
 
     render() {
 
@@ -185,40 +404,15 @@ export default class Minefield extends PureComponent {
             dimensions: {
                 width: this.state.fieldWidth,
                 height: this.state.fieldHeight
-            }            
+            }
         });
-        let cells = null;
-
-        if (this.state.cellWidth && this.state.cellHeight) {
-            cells = Object.keys(this.props.field.cells).map((id) => {
-                const cell = this.props.field.cells[id];
-
-                if (!cell.closed || cell.flagged) {
-                    return <Cell
-                        key={cell.id}
-                        data={cell}
-                        width={this.state.cellWidth}
-                        height={this.state.cellHeight}
-                        x={this.state.cellWidth * cell.row}
-                        y={this.state.cellHeight * cell.row}
-                        layoutStyles={this.cellLayouts[cell.id].layout}
-                        onCellClick={this.props.onCellClick} onCellAltClick={this.props.onCellAltClick} />
-                }
-                else {
-                    return null;
-                }
-            });
-        }
 
         return <View style={commonStyles.border} onLayout={this.handleLayoutChange} >
             <TouchableWithoutFeedback onPress={this.onFieldPress} onLongPress={this.onFieldLongPress}>
                 <View style={fieldStyles.dimensions} >
-                    <Image source={{ uri: 'field_16_16' }} style={fieldStyles.dimensions} />
-                    {!!(this.state.fieldWidth && this.state.fieldHeight) && cells}
+                    <WebGLView style={fieldStyles.dimensions} onContextCreate={this.onContextCreate} />
                 </View>
             </TouchableWithoutFeedback>
         </View>;
-
-
     }
 }

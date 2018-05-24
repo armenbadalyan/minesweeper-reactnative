@@ -1,13 +1,11 @@
 import React, { PureComponent } from 'react';
 import { WebGLView } from "react-native-webgl";
 import { Cell } from '../cell';
-import { mine } from '../../assets/base64Images.json';
 import { GameStatus } from '../../modules/game';
 import TextManager from '../../shared/texture-manager';
 
 import {
     View,
-    Image,
     TouchableWithoutFeedback,
     StyleSheet
 } from 'react-native';

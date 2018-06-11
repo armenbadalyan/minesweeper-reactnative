@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { connect } from 'react-redux';
 import { initGame, cellClick, cellAltClick, convertToMines} from '../../modules/game';
 import Minefield from '../../components/minefield/minefield';
-import StatBoard from '../../components/statboard/statboard';
+import StatBoard from '../../components/statboard/StatBoard';
 import Button from '../../components/Button';
 import styles from './styles.js';
 
@@ -34,7 +34,8 @@ export class GameScreen extends Component {
       
         this.handleCellClick = this.handleCellClick.bind(this);
         this.handleCellAltClick = this.handleCellAltClick.bind(this);
-        this.handleGameButtonClick = this.handleGameButtonClick.bind(this);
+        this.onGameButtonPressed = this.onGameButtonPressed.bind(this);
+        this.onMenuButtonPressed = this.onMenuButtonPressed.bind(this);
     }
 
     componentDidMount() {
@@ -49,8 +50,12 @@ export class GameScreen extends Component {
             }, 0);
     }
 
-    handleGameButtonClick() {
+    onGameButtonPressed() {
         this.startGameWithOptions(this.props.navigation.getParam('gameOptions'));
+    }
+
+    onMenuButtonPressed() {
+        this.props.navigation.goBack();
     }
 
     handleCellClick(id) {
@@ -72,7 +77,11 @@ export class GameScreen extends Component {
     render() {
         return (
             <View style={styles.game}>
-                <StatBoard game={this.props.game.game} flaggedMines={this.countFlaggedMines(this.props.game.field)} onGameButtonClick={this.handleGameButtonClick} />
+                <StatBoard 
+                    game={this.props.game.game} 
+                    flaggedMines={this.countFlaggedMines(this.props.game.field)} 
+                    onGameButtonPressed={this.onGameButtonPressed}
+                    onMenuButtonPressed={this.onMenuButtonPressed} />
                 { /*<div className="game__separator" />*/ }
                 <Minefield field={this.props.game.field} status={this.props.game.game.status} onCellClick={this.handleCellClick}  onCellAltClick={this.handleCellAltClick} mines="10" />
                { /*<Button title="Convert to mines" onPress={this.handleConvertToMines} /> */ }

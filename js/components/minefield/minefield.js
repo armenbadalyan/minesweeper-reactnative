@@ -3,14 +3,15 @@ import { WebGLView } from "react-native-webgl";
 import { Cell } from '../cell';
 import { GameStatus } from '../../modules/game';
 import TextManager from '../../shared/texture-manager';
-
 import {
     View,
+    AppState,
     TouchableWithoutFeedback,
     StyleSheet
 } from 'react-native';
 import commonStyles from '../../shared/styles.js';
 import TextureManager from '../../shared/texture-manager';
+import { BG_MAIN_COLOR } from '../../constants';
 
 const FIELD_BORDER_WIDTH = 6;
 const textures = [{
@@ -81,9 +82,6 @@ const assetsPerRow = 4;
 export default class Minefield extends PureComponent {
 
     cellLayouts = {};
-    canvas = null;
-    imagesLoaded = false;
-    mineImage;
     gl = null;
     texturesLoaded = false;
     program;
@@ -92,14 +90,24 @@ export default class Minefield extends PureComponent {
         super(props);
 
         this.state = {
+            appState: 'active',
+            gameFieldReady: false,
             cellWidth: 0,
             cellHeight: 0,
             fieldWidth: 0,
             fieldHeight: 0
         }
-
-        //this.handleLayoutChange = this.handleLayoutChange.bind(this);
     }
+
+    componentDidMount() {
+        AppState.addEventListener('change', this.onAppStateChanged);
+    }
+
+    componentWillUnmount() {
+        this.unloadTextures();
+        AppState.removeEventListener('change', this.onAppStateChanged);
+    }   
+
     UNSAFE_componentWillReceiveProps(nextProps) {
         if (nextProps.field.rows !== this.props.field.rows || nextProps.field.cols !== this.props.field.cols) {
             this.calculateCellLayouts(nextProps.field, this.state.cellWidth, this.state.cellHeight);
@@ -181,9 +189,23 @@ export default class Minefield extends PureComponent {
             this.texturesLoaded = true;
             this.createShaders();
             this.renderField(this.props.field, this.props.status);
+            this.setState({gameFieldReady: true});
         }).catch(err => {
             console.log(err);
         });
+    }
+
+    onAppStateChanged = (nextAppState) => {
+        // when pausing unload textures to prevent black square/flickering problems after resume
+        if (nextAppState !== 'active') {
+            this.unloadTextures();
+        }
+        
+        this.setState({appState: nextAppState});
+    }
+
+    loadTextures() {
+        TextManager.loadTextures(this.gl, textures);
     }
 
     initField() {
@@ -333,8 +355,6 @@ export default class Minefield extends PureComponent {
             x + cw, y,
             x + cw, y - ch);
 
-        //console.log(vertices);
-
         if (cell.closed) {
             if (cell.flagged) {
                 asset = assets['flag'];
@@ -370,6 +390,11 @@ export default class Minefield extends PureComponent {
             this.getAssetX(1.0, asset), this.getAssetY(0.0, asset),
             this.getAssetX(1.0, asset), this.getAssetY(1.0, asset)
         );
+    }
+
+    unloadTextures = () => {
+        TextureManager.unloadTextures(this.gl, textures);
+        this.texturesLoaded = false;
     }
 
     getAssetX(x, asset) {
@@ -408,9 +433,17 @@ export default class Minefield extends PureComponent {
         return <View style={commonStyles.border} onLayout={this.handleLayoutChange} >
             <TouchableWithoutFeedback onPress={this.onFieldPress} onLongPress={this.onFieldLongPress}>
                 <View style={fieldStyles.dimensions} >
-                    <WebGLView style={fieldStyles.dimensions} onContextCreate={this.onContextCreate} />
+                    <View>
+                        { this.state.appState === 'active' ? <WebGLView style={fieldStyles.dimensions} onContextCreate={this.onContextCreate} /> : null }
+                    </View>                    
+                    
                 </View>
             </TouchableWithoutFeedback>
+            { !this.state.gameFieldReady && <View style={styles.fieldOverlay} />}
         </View>;
     }
 }
+
+const styles = StyleSheet.create({
+    fieldOverlay: {top: 0, left:0, right: 0, bottom: 0, backgroundColor: BG_MAIN_COLOR, position: 'absolute'}
+});

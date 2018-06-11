@@ -27,10 +27,6 @@ const mapDispatchToProps = dispatch => ({
     }
 });
 
-const ROWS = 16;
-const COLS = 16;
-const MINES = 40;
-
 export class GameScreen extends Component {
 
     constructor(props) {
@@ -42,7 +38,7 @@ export class GameScreen extends Component {
     }
 
     componentDidMount() {
-        this.props.initGame(ROWS, COLS, MINES);
+        this.startGameWithOptions(this.props.navigation.getParam('gameOptions'));
     }
 
     countFlaggedMines(field) {
@@ -50,12 +46,11 @@ export class GameScreen extends Component {
             .reduce((count, key) => {
                 const cell = field.cells[key];
                 return cell.flagged ? ++count : count;
-            }, 0)
-
+            }, 0);
     }
 
     handleGameButtonClick() {
-        this.props.initGame(ROWS, COLS, MINES);
+        this.startGameWithOptions(this.props.navigation.getParam('gameOptions'));
     }
 
     handleCellClick(id) {
@@ -68,6 +63,10 @@ export class GameScreen extends Component {
 
     handleConvertToMines = () => {
         this.props.convertToMines();
+    }
+
+    startGameWithOptions(options) {
+        this.props.initGame(options.rows, options.cols, options.mines);
     }
 
     render() {

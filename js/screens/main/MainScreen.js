@@ -7,8 +7,26 @@ import logo from '../../assets/logo.png';
 
 export default class MainScreen extends Component {
 
-    onPress = () => {
-        this.props.navigation.navigate('Game');
+    startEasyGame = () => {
+        this.navigateToGameScreen({
+            rows: 8,
+            cols: 8,
+            mines: 10
+        });
+    }
+
+    startHardGame = () => {
+        this.navigateToGameScreen({
+            rows: 16,
+            cols: 16,
+            mines: 40
+        })
+    }
+
+    navigateToGameScreen(options) {
+        this.props.navigation.navigate('Game', {
+            gameOptions: options
+        });
     }
 
     render() {
@@ -17,8 +35,8 @@ export default class MainScreen extends Component {
                 <Image style={styles.logo} source={logo} resizeMode="contain" />
             </View>
             <View style={styles.row}>
-                <Button title="EASY" onPress={this.onPress} style={styles.button} />
-                <Button title="HARD" style={styles.button} />
+                <Button title="EASY" onPress={this.startEasyGame} style={styles.button} />
+                <Button title="HARD" onPress={this.startHardGame} style={styles.button} />
                 <Button title="LEADERBOARD" style={styles.button} />
             </View>            
             <View style={[styles.row, styles['row-flex-1']]}>

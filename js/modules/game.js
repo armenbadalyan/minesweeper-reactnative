@@ -97,14 +97,18 @@ export function initGame(rows, cols, mines) {
 
 export function cellClick(id) {
     return (dispatch, getState) => {
-        const start = Date.now();
-        const game = getState().game.game,
-            field = getState().game.field,
-            startedAt = game.status === GameStatus.NEW ? new Date() : game.startedAt,
+        const start = Date.now(),
+            { game, field } = getState().game,        
             cell = field.cells[id];
 
         let newField,
-            newStatus = GameStatus.IN_PROGRESS;
+            startedAt,
+            newStatus;
+            
+        if (checkLostOrWon(game)) return;
+
+        startedAt = game.status === GameStatus.NEW ? new Date() : game.startedAt;
+        newStatus = GameStatus.IN_PROGRESS;
 
         if (cell.closed) {
             newField = openCell(cell, field);
@@ -136,13 +140,17 @@ export function cellClick(id) {
 
 export function cellAltClick(id) {
     return (dispatch, getState) => {
-        const game = getState().game.game,
-            field = getState().game.field,
-            startedAt = game.status === GameStatus.NEW ? new Date() : game.startedAt,
+        const { game, field } = getState().game,  
             cell = field.cells[id];
 
-        let newField = field,
-            newStatus = GameStatus.IN_PROGRESS;
+        let newField,
+            startedAt,
+            newStatus;
+
+        if (checkLostOrWon(game)) return;
+
+        startedAt = game.status === GameStatus.NEW ? new Date() : game.startedAt;
+        newStatus = GameStatus.IN_PROGRESS;
 
         if (cell.closed) {
             newField = {
@@ -441,4 +449,8 @@ function setCellAttribute(cell, attr, value) {
     return Object.assign({}, cell, {
         [attr]: value
     })
+}
+
+function checkLostOrWon(game) {
+    return game.status === GameStatus.WON || game.status === GameStatus.LOST;
 }

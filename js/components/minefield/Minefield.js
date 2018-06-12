@@ -189,7 +189,10 @@ export default class Minefield extends PureComponent {
             this.texturesLoaded = true;
             this.createShaders();
             this.renderField(this.props.field, this.props.status);
-            this.setState({gameFieldReady: true});
+            setTimeout(() => {
+                this.setState({gameFieldReady: true});
+            }, 20);
+            
         }).catch(err => {
             console.log(err);
         });

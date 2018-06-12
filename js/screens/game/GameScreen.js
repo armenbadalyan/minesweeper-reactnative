@@ -2,11 +2,10 @@ import React, { Component } from 'react';
 import { View } from 'react-native';
 import { connect } from 'react-redux';
 import { initGame, cellClick, cellAltClick, convertToMines} from '../../modules/game';
-import Minefield from '../../components/minefield/minefield';
 import StatBoard from '../../components/statboard/StatBoard';
-import Button from '../../components/Button';
-import styles from './styles.js';
+import Minefield from '../../components/minefield/Minefield';
 
+import styles from './styles.js';
 
 const mapStateToProps = state => ({
     game: state.game

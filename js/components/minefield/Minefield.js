@@ -68,11 +68,11 @@ const assets = {
         offsetY: 0.5
     },
     empty: {
-        offsetX: 0.0,
+        offsetX: 0.25,
         offsetY: 0.75
     },
     closed: {
-        offsetX: 0.25,
+        offsetX: 0.5,
         offsetY: 0.75
     }
 

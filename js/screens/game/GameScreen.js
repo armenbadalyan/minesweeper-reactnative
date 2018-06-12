@@ -2,9 +2,8 @@ import React, { Component } from 'react';
 import { View } from 'react-native';
 import { connect } from 'react-redux';
 import { initGame, cellClick, cellAltClick, convertToMines} from '../../modules/game';
-import Minefield from '../../components/minefield/minefield';
+import Minefield from '../../components/minefield/Minefield';
 import StatBoard from '../../components/statboard/statboard';
-import Button from '../../components/Button';
 import styles from './styles.js';
 
 

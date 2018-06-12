@@ -41,7 +41,7 @@ export class Timer extends PureComponent {
 
     tick() {
         this.setState({
-            secondsElapsed: Math.floor((new Date() - this.startedAt) / 1000)
+            secondsElapsed: Math.floor((global.nativePerformanceNow() - this.startedAt)/1000)
         });
         this.timerID = setTimeout(this.tick, 100);
     }

@@ -1,4 +1,3 @@
-
 // Actions
 
 const INIT_GAME = 'game/INIT_GAME';
@@ -83,9 +82,9 @@ export default (state = initialState, action) => {
 // action creators
 
 export function initGame(rows, cols, mines) {
-    const start = Date.now();
+    const start = global.nativePerformanceNow();
     const field = countMines(plantMines(rows, cols, mines));
-    console.log('init game', Date.now() - start);
+    console.log('init game', global.nativePerformanceNow() - start);
     return {
         type: INIT_GAME,
         payload: {
@@ -97,7 +96,7 @@ export function initGame(rows, cols, mines) {
 
 export function cellClick(id) {
     return (dispatch, getState) => {
-        const start = Date.now(),
+        const start = global.nativePerformanceNow(),
             { game, field } = getState().game,        
             cell = field.cells[id];
 
@@ -107,7 +106,7 @@ export function cellClick(id) {
             
         if (checkLostOrWon(game)) return;
 
-        startedAt = game.status === GameStatus.NEW ? new Date() : game.startedAt;
+        startedAt = game.status === GameStatus.NEW ? global.nativePerformanceNow() : game.startedAt;
         newStatus = GameStatus.IN_PROGRESS;
 
         if (cell.closed) {
@@ -125,7 +124,7 @@ export function cellClick(id) {
             newField = flagRemainingMines(newField);
         }
 
-        console.log('cell click', Date.now() - start);
+        console.log('cell click', global.nativePerformanceNow() - start);
 
         dispatch({
             type: UPDATE_GAME,
@@ -149,7 +148,7 @@ export function cellAltClick(id) {
 
         if (checkLostOrWon(game)) return;
 
-        startedAt = game.status === GameStatus.NEW ? new Date() : game.startedAt;
+        startedAt = game.status === GameStatus.NEW ? global.nativePerformanceNow() : game.startedAt;
         newStatus = GameStatus.IN_PROGRESS;
 
         if (cell.closed) {

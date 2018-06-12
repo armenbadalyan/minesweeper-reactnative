@@ -32,7 +32,7 @@ export default class MainScreen extends Component {
     render() {
         return (<View style={styles.screen}>
             <View style={[styles.row, styles['row-flex-1']]}>
-                <Image style={styles.logo} source={logo} resizeMode="contain" />
+                <Image style={styles.logo} source={logo} resizeMode="contain" fadeDuration={0} />
             </View>
             <View style={styles.row}>
                 <Button title="EASY" onPress={this.startEasyGame} style={styles.button} />

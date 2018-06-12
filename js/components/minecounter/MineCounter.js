@@ -3,9 +3,7 @@ import {
   Text,
   View
 } from 'react-native';
-import LCD from '../lcd/lcd.js';
-
-//import './minecounter.css'
+import LCD from '../lcd/LCD';
 
 class MineCounter extends PureComponent {
 

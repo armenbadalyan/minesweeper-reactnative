@@ -4,10 +4,10 @@ import {
 	StyleSheet,
 	TouchableHighlight
 } from 'react-native';
-import Timer from '../timer/timer.js';
-import MineCounter from '../minecounter/minecounter.js';
-import Icon from '../icon/icon.js';
-import commonStyles from '../../shared/styles.js'
+import Timer from '../timer/Timer';
+import MineCounter from '../minecounter/MineCounter';
+import Icon from '../icon/icon';
+import commonStyles from '../../shared/styles'
 
 
 export default class StatBoard extends PureComponent {

@@ -9,7 +9,7 @@ class Icon extends PureComponent {
 	render() {
 		return !!this.props.source && <Image width={this.props.width}
 			height={this.props.height} 
-			style={[this.props.style, styles.icon]} 
+			style={[styles.icon, this.props.style]} 
 			fadeDuration={0} 
 			source={{uri: this.props.source}} /> 
 	}

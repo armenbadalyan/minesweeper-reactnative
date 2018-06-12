@@ -6,6 +6,7 @@ import {
 import Icon from '../icon/icon';
 
 
+const MAX_LCD_VALUE = 999;
 const digits = {
     d0: 'd_0',
     d1: 'd_1',
@@ -28,15 +29,20 @@ export default class LCD extends PureComponent {
             currentDigit,
             value = this.props.value;
 
-        currentDigit = Math.floor(value / 100);
-        d1 = `d${currentDigit}`;
+        if (value > MAX_LCD_VALUE) {
+            d1 = d2 = d3 = 'd_9';
+        }
+        else {
+            currentDigit = Math.floor(value / 100);
+            d1 = `d${currentDigit}`;
 
-        value -= currentDigit * 100;
-        currentDigit = Math.floor(value / 10);
-        d2 = `d${currentDigit}`;
+            value -= currentDigit * 100;
+            currentDigit = Math.floor(value / 10);
+            d2 = `d${currentDigit}`;
 
-        value -= currentDigit * 10;
-        d3 = `d${value}`;
+            value -= currentDigit * 10;
+            d3 = `d${value}`;
+        }
 
         return <View style={styles.lcd}>
             <Icon style={styles.digit} fadeDuration={0} source={digits[d1]} />
@@ -48,22 +54,22 @@ export default class LCD extends PureComponent {
 
 const styles = StyleSheet.create({
     lcd: {
-      backgroundColor: '#000',
-      width: 70,
-      height: 40,
-      flexDirection: 'row',
-      flexWrap: 'nowrap',
-      justifyContent: 'space-between',
-      borderWidth: 1,
-      borderStyle: 'solid',
-      borderLeftColor: '#808080',
-      borderTopColor: '#808080',
-      borderRightColor: '#fff',
-      borderBottomColor: '#fff',    
-      padding: 2
+        backgroundColor: '#000',
+        width: 70,
+        height: 40,
+        flexDirection: 'row',
+        flexWrap: 'nowrap',
+        justifyContent: 'space-between',
+        borderWidth: 1,
+        borderStyle: 'solid',
+        borderLeftColor: '#808080',
+        borderTopColor: '#808080',
+        borderRightColor: '#fff',
+        borderBottomColor: '#fff',
+        padding: 2
     },
-    digit: {    
-      width: 20,
-      flex: 0
+    digit: {
+        width: 20,
+        flex: 0
     },
-  });
+});

@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import LCD from '../lcd/LCD';
 
-export class Timer extends PureComponent {
+export default class Timer extends PureComponent {
 
     constructor(props) {
         super(props);
@@ -41,7 +41,7 @@ export class Timer extends PureComponent {
 
     tick() {
         this.setState({
-            secondsElapsed: Math.floor((global.nativePerformanceNow() - this.startedAt)/1000)
+            secondsElapsed: Math.min(Math.floor((global.nativePerformanceNow() - this.startedAt)/1000), MAX_LCD_VALUE)
         });
         this.timerID = setTimeout(this.tick, 100);
     }
@@ -51,4 +51,4 @@ export class Timer extends PureComponent {
     }
 }
 
-export default Timer;
+const MAX_LCD_VALUE = 999;

@@ -160,16 +160,16 @@ export function cellAltClick(id) {
                     [cell.id]: setCellAttribute(cell, 'flagged', !cell.flagged)
                 }
             };
-        }
 
-        dispatch({
-            type: UPDATE_GAME,
-            payload: {
-                startedAt,
-                status: newStatus,
-                field: newField
-            }
-        });
+            dispatch({
+                type: UPDATE_GAME,
+                payload: {
+                    startedAt,
+                    status: newStatus,
+                    field: newField
+                }
+            });
+        }        
     }
 }
 

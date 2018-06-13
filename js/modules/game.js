@@ -83,13 +83,13 @@ export default (state = initialState, action) => {
 
 export function initGame(rows, cols, mines) {
     const start = global.nativePerformanceNow();
-    const field = countMines(plantMines(rows, cols, mines));
+    //const field = assignMineCountsToCells(plantMines(rows, cols, mines));
     console.log('init game', global.nativePerformanceNow() - start);
     return {
         type: INIT_GAME,
         payload: {
             mines,
-            field
+            field: getCleanField(rows, cols)
         }
     }
 }
@@ -97,22 +97,27 @@ export function initGame(rows, cols, mines) {
 export function cellClick(id) {
     return (dispatch, getState) => {
         const start = global.nativePerformanceNow(),
-            { game, field } = getState().game,        
-            cell = field.cells[id];
+            { game, field, game: { totalMines } } = getState().game;       
+            //cell = field.cells[id];
 
-        let newField,
+        let newField = field,
             startedAt,
             newStatus;
             
         if (checkLostOrWon(game)) return;
 
+        if (checkFirstTap(game)) {
+            newField = assignMineCountsToCells(plantMines(newField, totalMines, id));
+            console.log(totalMines);
+        }
+
         startedAt = game.status === GameStatus.NEW ? global.nativePerformanceNow() : game.startedAt;
         newStatus = GameStatus.IN_PROGRESS;
 
-        if (cell.closed) {
-            newField = openCell(cell, field);
+        if (newField.cells[id].closed) {
+            newField = openCell(id, newField);
         } else {
-            newField = quickOpen(cell, field);
+            newField = quickOpen(id, newField);
         }
 
         newStatus = validateGameStatus(newField);
@@ -142,14 +147,9 @@ export function cellAltClick(id) {
         const { game, field } = getState().game,  
             cell = field.cells[id];
 
-        let newField,
-            startedAt,
-            newStatus;
-
+        let newField;
+        
         if (checkLostOrWon(game)) return;
-
-        startedAt = game.status === GameStatus.NEW ? global.nativePerformanceNow() : game.startedAt;
-        newStatus = GameStatus.IN_PROGRESS;
 
         if (cell.closed) {
             newField = {
@@ -163,8 +163,8 @@ export function cellAltClick(id) {
             dispatch({
                 type: UPDATE_GAME,
                 payload: {
-                    startedAt,
-                    status: newStatus,
+                    startedAt: game.startedAt,
+                    status: game.status,
                     field: newField
                 }
             });
@@ -185,15 +185,21 @@ export function convertToMines() {
     };
 }
 
-function plantMines(rows, cols, mineCount) {
-    const mineCells = {},
-        field = {
-            rows,
-            cols,
-            cells: createCells(rows, cols)
-        },
-        cellKeys = Object.keys(field.cells);
+function getCleanField(rows, cols) {
+   return {
+        rows,
+        cols,
+        cells: createCells(rows, cols)
+    }
+}
 
+function plantMines(field, mineCount, firstCellId) {
+    const mineCells = {},
+        cellKeys = Object.keys(field.cells),
+        firstCellIndex = cellKeys.findIndex(cellKey => cellKey === firstCellId);;
+
+    cellKeys.splice(firstCellIndex, 1);
+    
     while (mineCount) {
         mineCount--;
 
@@ -205,12 +211,13 @@ function plantMines(rows, cols, mineCount) {
         mineCells[id] = setCellAttribute(field.cells[id], 'mine', true);
     }
 
-
-    const cells = Object.assign({}, field.cells, mineCells)
-
-    return Object.assign({}, field, {
-        cells: cells
-    });
+    return {
+        ...field,
+        cells: {
+            ...field.cells,
+            ...mineCells
+        }
+    }
 }
 
 function createCells(rows, cols) {
@@ -241,7 +248,7 @@ function createCells(rows, cols) {
     return cells;
 }
 
-function countMines(field) {
+function assignMineCountsToCells(field) {
     Object.keys(field.cells)
         .forEach(id => {
             var cell = field.cells[id];
@@ -251,7 +258,10 @@ function countMines(field) {
                 field.cells[id] = setCellAttribute(cell, 'minesAround', mineCount);
             }
         });
-    return Object.assign({}, field);
+
+    return {
+        ...field
+    }
 }
 
 function countMinesAroundCell(cell, field) {
@@ -298,12 +308,11 @@ function getNeighbourCells(cell, field) {
     }).map(coords => field.cells[coords.row + ':' + coords.col]);
 }
 
-function openCell(cell, field) {
-    let newField = field;
+function openCell(cellId, field) {
+    let newField = field,
+        cell = newField.cells[cellId];
 
     if (cell.mine) {
-        cell.exploded = true;
-        cell.closed = false;
         field.cells[cell.id] = {
             ...cell,
             exploded: true,
@@ -344,7 +353,8 @@ function openCell(cell, field) {
     };
 }
 
-function quickOpen(cell, field) {
+function quickOpen(cellId, field) {
+    const cell = field.cells[cellId];
     if (cell.minesAround > 0) {
         let cellNeighbours = getNeighbourCells(cell, field),
             flaggedNeighbours = cellNeighbours.filter(cell => cell.flagged);
@@ -352,7 +362,7 @@ function quickOpen(cell, field) {
         if (flaggedNeighbours.length === cell.minesAround) {
             return cellNeighbours
                 .filter(cell => !cell.flagged && cell.closed)
-                .reduce((prevField, cell) => openCell(cell, prevField), field);
+                .reduce((prevField, cell) => openCell(cell.id, prevField), field);
         } else {
             return field;
         }
@@ -445,11 +455,16 @@ function findMistakes(field) {
 }
 
 function setCellAttribute(cell, attr, value) {
-    return Object.assign({}, cell, {
+    return {
+        ...cell,
         [attr]: value
-    })
+    }
 }
 
 function checkLostOrWon(game) {
     return game.status === GameStatus.WON || game.status === GameStatus.LOST;
+}
+
+function checkFirstTap(game) {
+    return game.status === GameStatus.NEW;
 }

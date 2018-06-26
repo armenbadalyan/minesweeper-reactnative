@@ -16,7 +16,8 @@ export const GameStatus = {
 const initialState = {
     game: {
         status: GameStatus.NEW,
-        startedAt: null,
+        startedAt: 0,
+        finishedAt:0,
         totalMines: 0
     },
     field: {
@@ -57,7 +58,8 @@ export default (state = initialState, action) => {
                 game: {
                     ...state.game,
                     status: GameStatus.NEW,
-                    startedAt: null,
+                    startedAt: 0,
+                    finishedAt: 0,
                     totalMines: payload.mines
                 },
                 field: payload.field
@@ -68,7 +70,8 @@ export default (state = initialState, action) => {
                 game: {
                     ...state.game,
                     status: payload.status,
-                    startedAt: payload.startedAt
+                    startedAt: payload.startedAt,
+                    finishedAt: payload.finishedAt
                 },
                 field: payload.field
             }
@@ -101,17 +104,18 @@ export function cellClick(id) {
             //cell = field.cells[id];
 
         let newField = field,
-            startedAt,
-            newStatus;
+            startedAt = game.startedAt,
+            finishedAt = game.finishedAt,
+            newStatus,
+            firstClick;
             
         if (checkLostOrWon(game)) return;
 
         if (checkFirstTap(game)) {
             newField = assignMineCountsToCells(plantMines(newField, totalMines, id));
-            console.log(totalMines);
+            firstClick = true;
         }
-
-        startedAt = game.status === GameStatus.NEW ? global.nativePerformanceNow() : game.startedAt;
+        
         newStatus = GameStatus.IN_PROGRESS;
 
         if (newField.cells[id].closed) {
@@ -126,15 +130,20 @@ export function cellClick(id) {
             newField = findMistakesAndUncoverMines(newField);
         }
         else if (newStatus === GameStatus.WON) {
+            finishedAt = global.nativePerformanceNow();
             newField = flagRemainingMines(newField);
         }
-
         console.log('cell click', global.nativePerformanceNow() - start);
+        
+        if (firstClick) {
+            startedAt = global.nativePerformanceNow();
+        }        
 
         dispatch({
             type: UPDATE_GAME,
             payload: {
                 startedAt,
+                finishedAt,
                 status: newStatus,
                 field: newField
             }
@@ -164,6 +173,7 @@ export function cellAltClick(id) {
                 type: UPDATE_GAME,
                 payload: {
                     startedAt: game.startedAt,
+                    finishedAt: game.finishedAt,
                     status: game.status,
                     field: newField
                 }

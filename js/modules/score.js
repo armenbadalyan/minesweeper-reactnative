@@ -2,9 +2,11 @@ import firebase from 'react-native-firebase';
 
 // Actions
 export const UPDATE_BEST_SCORE = 'score/UPDATE_BEST_SCORE';
+export const SET_LAST_SCORE = 'score/SET_LAST_SCORE';
 
 // default state
 const initialState = {
+    lastScore: null,
     bestScore: {
         beginner: null,
         intermediate: null,
@@ -24,6 +26,12 @@ export default (state = initialState, action) => {
                     ...payload
                 }
             }
+        case SET_LAST_SCORE: {
+            return {
+                ...state,
+                lastScore: payload
+            }
+        }
         default:
             return state;
     }
@@ -51,20 +59,29 @@ export function saveScore(score, difficulty) {
                 timestamp
             })
             .then(() => {
-                console.log('score saved');
-                dispatch({
-                    type: UPDATE_BEST_SCORE,
-                    payload: {
-                        [difficulty]: {
-                            score,
-                            timestamp
-                        }
-                    }
-                });
+                console.log('score saved');                
             })
             .catch(err => {
                 console.log(err);
-            })
+            });
+
+            dispatch({
+                type: UPDATE_BEST_SCORE,
+                payload: {
+                    [difficulty]: {
+                        score,
+                        timestamp
+                    }
+                }
+            });
+
+            dispatch({
+                type: SET_LAST_SCORE,
+                payload: {
+                    score,
+                    timestamp
+                }
+            });
         }
         
     }

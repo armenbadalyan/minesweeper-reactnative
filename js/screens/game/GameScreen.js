@@ -5,12 +5,12 @@ import { initGame, cellClick, cellAltClick, convertToMines, GameStatus } from '.
 import StatBoard from '../../components/statboard/StatBoard';
 import Minefield from '../../components/minefield/Minefield';
 import GameText from '../../components/GameText';
+import { formatGameTime } from '../../shared/time-utils';
 
 const mapStateToProps = state => ({
     game: state.game,
     status: state.game.game.status,
-    startedAt: state.game.game.startedAt,
-    finishedAt: state.game.game.finishedAt
+    lastScore: state.score.lastScore
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -75,11 +75,6 @@ export class GameScreen extends Component {
         this.props.initGame(options.difficulty);
     }
 
-    getCompletionTime(startedAt, finishedAt) {
-        console.log(startedAt, finishedAt);
-        return ((finishedAt - startedAt) / 1000).toFixed(2);
-    }
-
     render() {
         return (
             <View style={styles.game}>
@@ -89,10 +84,10 @@ export class GameScreen extends Component {
                     onGameButtonPressed={this.onGameButtonPressed}
                     onMenuButtonPressed={this.onMenuButtonPressed} />
                 { /*<div className="game__separator" />*/}
-                <Minefield field={this.props.game.field} status={this.props.game.game.status} onCellClick={this.handleCellClick} onCellAltClick={this.handleCellAltClick} mines="10" />
+                <Minefield field={this.props.game.field} status={this.props.game.game.status} onCellClick={this.handleCellClick} onCellAltClick={this.handleCellAltClick} />
                 { /*<Button title="Convert to mines" onPress={this.handleConvertToMines} /> */}
-                {this.props.status === GameStatus.WON && <View style={styles.winSection}>
-                    <GameText style={styles.winMessage}>Completed in {this.getCompletionTime(this.props.startedAt, this.props.finishedAt)}s</GameText>
+                {this.props.status === GameStatus.WON && this.props.lastScore && <View style={styles.winSection}>
+                    <GameText style={styles.winMessage}>Completed in {formatGameTime(this.props.lastScore.score, 2)}s</GameText>
                     <GameText style={styles.highscoreMessage}>New highscore!</GameText>
                 </View>
                 }

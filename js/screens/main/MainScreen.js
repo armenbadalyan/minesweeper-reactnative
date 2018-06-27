@@ -8,9 +8,11 @@ import Button from '../../components/Button';
 import GameText from '../../components/GameText';
 import { BG_MAIN_COLOR } from '../../constants';
 import logo from '../../assets/logo.png';
+import { formatGameTime } from '../../shared/time-utils';
 
 const mapStateToProps = state => ({
-    auth: state.auth
+    auth: state.auth,
+    bestScore: state.score.bestScore
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -48,12 +50,17 @@ export class MainScreen extends Component {
     }
 
     render() {
+        const bestScore = this.props.bestScore;
+        const beginnerScore = bestScore.beginner ? formatGameTime(bestScore.beginner.score, 2) : 'NA';
+        const intermediateScore = bestScore.intermediate ? formatGameTime(bestScore.intermediate.score, 2) : 'NA';
+        const expertScore = bestScore.expert ? formatGameTime(bestScore.expert.score, 2) : 'NA';
+
         return (<View style={styles.screen}>
             <View style={[styles.row, styles['row-flex-1']]}>
                 <Image style={styles.logo} source={logo} resizeMode="contain" fadeDuration={0} />
             </View>
             <View style={[styles.row, styles.greeting]}>
-                {this.props.auth.user && <GameText numberOfLines={1} ellipsizeMode="tail">Hello, {this.props.auth.user.displayName}</GameText>}
+                {this.props.auth.user && <GameText numberOfLines={1} ellipsizeMode="tail" style={styles.greetingText}>Hello, {this.props.auth.user.displayName}</GameText>}
             </View>            
             <View style={styles.row}>
                 <Button title="BEGINNER" onPress={this.startBeginnerGame} style={styles.button} />
@@ -62,6 +69,24 @@ export class MainScreen extends Component {
                 {this.props.auth.user && <Button title="SIGN OUT" style={styles.button} onPress={this.props.signOut} />}
             </View>            
             <View style={[styles.row, styles['row-flex-1']]}>
+                {this.props.auth.user && <GameText style={{marginBottom: 20}}>HIGH SCORES</GameText>}
+                {this.props.auth.user && <View style={{width: '70%'}}>
+                    <View style={{flexDirection: 'row', width: '100%', justifyContent: 'space-between'}}>
+                        <View style={{flex: 1, alignItems: 'center'}}>
+                            <GameText>Bgnr</GameText>
+                            <GameText>{ beginnerScore }</GameText>
+                        </View>
+                        <View style={{flex: 1, alignItems: 'center'}}>
+                            <GameText>Intrm</GameText>
+                            <GameText>{ intermediateScore }</GameText>
+                        </View>
+                        <View style={{flex: 1, alignItems: 'center'}}>
+                            <GameText>Xprt</GameText>
+                            <GameText>{ expertScore }</GameText>
+                        </View>                      
+                    </View>                                  
+                </View>}
+                
             </View>
         </View>);
     }
@@ -99,8 +124,10 @@ const styles = StyleSheet.create({
     },
     greeting: {
         height: 40,
-        paddingLeft: 20,
-        paddingRight: 20,
-        marginBottom: 20
+        marginBottom: 20        
+    },
+    greetingText: {
+        width: '70%',
+        color: 'green'
     }
 });

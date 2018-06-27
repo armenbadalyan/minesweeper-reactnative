@@ -36,29 +36,32 @@ export default (state = initialState, action) => {
 
 // action creators
 
-export function restoreAuthenication() {
+export function restoreAuthentication() {
     return (dispatch) => {
-        const unsubscribe = firebase.auth().onAuthStateChanged(function (user) {
-            console.log(user);
-            unsubscribe();
-            if (user) {
-                console.log('Current user ', user);
-                dispatch({
-                    type: SIGN_IN,
-                    payload: user.toJSON()
-                });
-            }
-            else {
-                dispatch(signInAnonymously());
-            }
-        });
+        return new Promise((resolve, reject) => {
+            const unsubscribe = firebase.auth().onAuthStateChanged(function (user) {
+                console.log(user);
+                unsubscribe();
+                if (user) {
+                    console.log('Current user ', user);
+                    dispatch({
+                        type: SIGN_IN,
+                        payload: user.toJSON()
+                    });
 
+                    resolve(user.toJSON());
+                }
+                else {
+                    resolve(dispatch(signInAnonymously()));
+                }
+            });
+        });
     }
 }
 
 export function signInAnonymously() {
     return (dispatch) => {
-        firebase.auth()
+        return firebase.auth()
             .signInAnonymouslyAndRetrieveData()
             .then(credential => {
                 if (credential) {
@@ -67,27 +70,26 @@ export function signInAnonymously() {
                         type: SIGN_IN,
                         payload: credential.user.toJSON()
                     });
-                    return credential.user;
+                    return credential.user.toJSON();
                 }
                 else {
-                    Promise.reject();
+                    return Promise.reject();
                 }
             })
             .then(user => {
                 if (!user.displayName) {
-                    user.updateProfile({
-                        displayName: `Player${generatePlayerId(20)}`
+                    return user.updateProfile({
+                        displayName: `Player${generatePlayerId(4)}`
                     }).then(() => {
+                        const user = firebase.auth().currentUser.toJSON();
                         dispatch({
                             type: USER_PROFILE_UPDATE,
-                            payload: firebase.auth().currentUser.toJSON()
+                            payload: user
                         });
+                        return user;
                     });
                 }
-                return user;
-            })
-            .catch(err => {
-                console.log(err);
+                return user.toJSON();
             });
     }
 }

@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { View, Image, StyleSheet} from 'react-native';
-import { restoreAuthenication, signOut } from '../../modules/auth';
+import { restoreAuthentication, signOut } from '../../modules/auth';
+import { restoreScore } from '../../modules/score';
 import { DifficultyLevel } from '../../modules/game';
 import Button from '../../components/Button';
 import GameText from '../../components/GameText';
@@ -16,11 +17,14 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-    restoreAuthenication: () => {
-        dispatch(restoreAuthenication());
+    restoreAuthentication: () => {
+        return dispatch(restoreAuthentication());
+    },
+    restoreScore: () => {
+        return dispatch(restoreScore())
     },
     signOut: () => {
-        dispatch(signOut());
+        return dispatch(signOut());
     }
 });
 
@@ -28,7 +32,15 @@ export class MainScreen extends Component {
 
     componentDidMount() {
         console.log('restoreAuthenication');
-        this.props.restoreAuthenication();
+
+        const {restoreAuthentication, restoreScore} = this.props;
+
+        restoreAuthentication()
+            .then(restoreScore)
+            .catch(err => {
+                // TODO: don't forget to handle me
+                console.log(err);
+            });
     }
 
     startBeginnerGame = () => {

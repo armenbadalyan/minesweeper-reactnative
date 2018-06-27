@@ -47,23 +47,23 @@ export function saveScore(score, difficulty) {
         if (user) {
             console.log('save score');
             firebase.firestore()
-            .collection('scores')
-            .add({
-                user: {
-                    uid: user.uid,
-                    displayName: user.displayName,
-                    photo: user.photoURL
-                },
-                score,
-                difficulty,
-                timestamp
-            })
-            .then(() => {
-                console.log('score saved');                
-            })
-            .catch(err => {
-                console.log(err);
-            });
+                .collection('scores')
+                .add({
+                    user: {
+                        uid: user.uid,
+                        displayName: user.displayName,
+                        photo: user.photoURL
+                    },
+                    score,
+                    difficulty,
+                    timestamp
+                })
+                .then(() => {
+                    console.log('score saved');                
+                })
+                .catch(err => {
+                    console.log(err);
+                });
 
             dispatch({
                 type: UPDATE_BEST_SCORE,
@@ -82,7 +82,36 @@ export function saveScore(score, difficulty) {
                     timestamp
                 }
             });
+        }        
+    }
+}
+
+export function restoreScore() {
+    return (dispatch, getState) => {
+        const user = getState().auth.user;
+        console.log('restoreScore');
+        if (user) {
+            return firebase.firestore()
+                .collection('scores')
+                .where('user.uid', '==', user.uid)
+                .get()
+                .then((snapshot) => {
+                    snapshot.forEach(doc => {
+                        const {score, difficulty, timestamp} = doc.data();
+                        dispatch({
+                            type: UPDATE_BEST_SCORE,
+                            payload: {
+                                [difficulty]: {
+                                    score,
+                                    timestamp
+                                }
+                            }
+                        });
+                    });
+                })
         }
-        
+        else {
+            return Promise.reject();
+        }
     }
 }

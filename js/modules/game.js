@@ -1,3 +1,5 @@
+import { saveScore } from './score';
+
 // Actions
 
 const INIT_GAME = 'game/INIT_GAME';
@@ -11,6 +13,29 @@ export const GameStatus = {
     LOST: 'lost'
 }
 
+export const DifficultyLevel = {
+    BEGINNER: 'beginner',
+    INTERMEDIATE: 'intermediate',
+    EXPERT: 'expert'
+}
+
+const fieldSettings = {
+    [DifficultyLevel.BEGINNER]: {
+        rows: 8,
+        cols: 8,
+        mines: 10
+    },
+    [DifficultyLevel.INTERMEDIATE]: {
+        rows: 16,
+        cols: 16,
+        mines: 40
+    },
+    [DifficultyLevel.EXPERT]: {
+        rows: 16,
+        cols: 30,
+        mines: 99
+    }}
+
 
 // default state
 const initialState = {
@@ -18,7 +43,8 @@ const initialState = {
         status: GameStatus.NEW,
         startedAt: 0,
         finishedAt:0,
-        totalMines: 0
+        totalMines: 0,
+        difficulty: null
     },
     field: {
         rows: 0,
@@ -60,7 +86,8 @@ export default (state = initialState, action) => {
                     status: GameStatus.NEW,
                     startedAt: 0,
                     finishedAt: 0,
-                    totalMines: payload.mines
+                    totalMines: payload.mines,
+                    difficulty: payload.difficulty
                 },
                 field: payload.field
             }
@@ -84,17 +111,23 @@ export default (state = initialState, action) => {
 
 // action creators
 
-export function initGame(rows, cols, mines) {
+export function initGame(difficulty) {
     const start = global.nativePerformanceNow();
+    const settings = fieldSettings[difficulty];
+    const mines = settings.mines;
     //const field = assignMineCountsToCells(plantMines(rows, cols, mines));
     console.log('init game', global.nativePerformanceNow() - start);
-    return {
-        type: INIT_GAME,
-        payload: {
-            mines,
-            field: getCleanField(rows, cols)
+
+    if (settings) {
+        return {
+            type: INIT_GAME,
+            payload: {
+                mines,
+                field: getCleanField(settings.rows, settings.cols),
+                difficulty
+            }
         }
-    }
+    }    
 }
 
 export function cellClick(id) {
@@ -106,14 +139,13 @@ export function cellClick(id) {
         let newField = field,
             startedAt = game.startedAt,
             finishedAt = game.finishedAt,
-            newStatus,
-            firstClick;
+            newStatus;
             
         if (checkLostOrWon(game)) return;
 
         if (checkFirstTap(game)) {
             newField = assignMineCountsToCells(plantMines(newField, totalMines, id));
-            firstClick = true;
+            startedAt = global.nativePerformanceNow();            
         }
         
         newStatus = GameStatus.IN_PROGRESS;
@@ -134,10 +166,6 @@ export function cellClick(id) {
             newField = flagRemainingMines(newField);
         }
         console.log('cell click', global.nativePerformanceNow() - start);
-        
-        if (firstClick) {
-            startedAt = global.nativePerformanceNow();
-        }        
 
         dispatch({
             type: UPDATE_GAME,
@@ -148,6 +176,10 @@ export function cellClick(id) {
                 field: newField
             }
         });
+
+        if (newStatus === GameStatus.WON) {
+            dispatch(saveScore(finishedAt - startedAt, game.difficulty));
+        }
     }
 }
 
@@ -206,7 +238,7 @@ function getCleanField(rows, cols) {
 function plantMines(field, mineCount, firstCellId) {
     const mineCells = {},
         cellKeys = Object.keys(field.cells),
-        firstCellIndex = cellKeys.findIndex(cellKey => cellKey === firstCellId);;
+        firstCellIndex = cellKeys.findIndex(cellKey => cellKey === firstCellId);
 
     cellKeys.splice(firstCellIndex, 1);
     

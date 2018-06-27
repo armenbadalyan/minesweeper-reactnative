@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { restoreAuthenication, signOut } from '../../modules/auth';
 import { View, Image, StyleSheet} from 'react-native';
+import { restoreAuthenication, signOut } from '../../modules/auth';
+import { DifficultyLevel } from '../../modules/game';
 import Button from '../../components/Button';
 import GameText from '../../components/GameText';
 import { BG_MAIN_COLOR } from '../../constants';
@@ -28,19 +29,15 @@ export class MainScreen extends Component {
         this.props.restoreAuthenication();
     }
 
-    startEasyGame = () => {
+    startBeginnerGame = () => {
         this.navigateToGameScreen({
-            rows: 8,
-            cols: 8,
-            mines: 10
+            difficulty: DifficultyLevel.BEGINNER
         });
     }
 
-    startHardGame = () => {
+    startIntermediateGame = () => {
         this.navigateToGameScreen({
-            rows: 16,
-            cols: 16,
-            mines: 40
+            difficulty: DifficultyLevel.INTERMEDIATE
         })
     }
 
@@ -59,8 +56,8 @@ export class MainScreen extends Component {
                 {this.props.auth.user && <GameText numberOfLines={1} ellipsizeMode="tail">Hello, {this.props.auth.user.displayName}</GameText>}
             </View>            
             <View style={styles.row}>
-                <Button title="EASY" onPress={this.startEasyGame} style={styles.button} />
-                <Button title="HARD" onPress={this.startHardGame} style={styles.button} />
+                <Button title="BEGINNER" onPress={this.startBeginnerGame} style={styles.button} />
+                <Button title="INTERMEDIATE" onPress={this.startIntermediateGame} style={styles.button} />
                 <Button title="LEADERBOARD" style={styles.button} />
                 {this.props.auth.user && <Button title="SIGN OUT" style={styles.button} onPress={this.props.signOut} />}
             </View>            

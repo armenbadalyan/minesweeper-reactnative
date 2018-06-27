@@ -14,8 +14,8 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-    initGame: (rows, cols, mines) => {
-        dispatch(initGame(rows, cols, mines));
+    initGame: (difficulty) => {
+        dispatch(initGame(difficulty));
     },
     cellClick: (id) => {
         dispatch(cellClick(id))
@@ -72,7 +72,7 @@ export class GameScreen extends Component {
     }
 
     startGameWithOptions(options) {
-        this.props.initGame(options.rows, options.cols, options.mines);
+        this.props.initGame(options.difficulty);
     }
 
     getCompletionTime(startedAt, finishedAt) {

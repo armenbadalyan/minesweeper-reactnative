@@ -8,6 +8,6 @@ export default function GameText(props) {
 
 const styles = StyleSheet.create({
     ownStyle: {
-        fontFamily: 'PressStart2P-Regular',
+        fontFamily: 'PressStart2P-Regular'
     }
 });

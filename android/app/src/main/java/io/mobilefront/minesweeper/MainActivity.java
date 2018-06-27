@@ -1,4 +1,4 @@
-package com.minesweeperreactnative;
+package io.mobilefront.minesweeper;
 
 import com.facebook.react.ReactActivity;
 

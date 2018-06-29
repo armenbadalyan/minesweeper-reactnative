@@ -1,9 +1,0 @@
-{
-  "parserOptions": {
-    "ecmaVersion": 6
-  },
-  "plugins": [
-    "promise"
-  ],
-  "extends": "eslint:recommended"
-}

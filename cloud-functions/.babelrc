@@ -9,5 +9,15 @@
                 }
             }
         ]
-    ]
+    ],
+    "plugins": [
+        ["add-header-comment", {
+          "header": [
+            "eslint-disable"
+          ],
+          "commentStart": " ",
+          "commentEnd": " ",
+          "commentLineStart": ""
+        }]
+      ]
 }

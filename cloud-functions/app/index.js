@@ -30,16 +30,22 @@ exports.addUserDetails = functions.auth.user()
 
 exports.processCommand = functions.firestore
     .document('commands/{commandId}')
-    .onCreate((snap) => {
+    .onCreate(async (snap, context) => {
         const command = snap.data();
         const commandType = command ? command.type : '';
 
-        switch (commandType) {
-            case 'SUBMIT_SCORE':
-                processScore(command);
-                break;
+        try {
+            switch (commandType) {
+                case 'SUBMIT_SCORE':
+                    await processScore(command);
+                    break;
+            }
         }
-
+        catch(err) {
+            console.log('Error processing command', err);
+        }
+        
+        return admin.firestore().doc(`commands/${context.params.commandId}`).delete();
     });
 
 
@@ -47,15 +53,15 @@ function processScore(scoreCommand) {
     const { payload, uid, payload: { score, difficulty, timestamp } } = scoreCommand;
 
     if (!payload || !uid) {
-        return false;
+        return Promise.reject();
     }
 
     if (score <= 0 && timestamp <= 0) {
-        return false;
+        return Promise.reject();
     }
 
     if (Object.values(DifficultyLevel).indexOf(difficulty) === -1) {
-        return false;
+        return Promise.reject();
     }
 
     const database = admin.firestore(),
@@ -63,7 +69,7 @@ function processScore(scoreCommand) {
         getScore = database.doc(`scores/${uid}_${difficulty}`).get();
 
 
-    Promise.all([getUser, getScore])
+    return Promise.all([getUser, getScore])
         .then(([userSnap, scoreSnap]) => {
             const userData = userSnap.data();
             const scoreData = scoreSnap.data();
@@ -78,7 +84,7 @@ function processScore(scoreCommand) {
                     })
             }
             else {
-                return true;
+                return Promise.reject();
             }
         });
 }

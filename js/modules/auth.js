@@ -70,7 +70,7 @@ export function signInAnonymously() {
                         type: SIGN_IN,
                         payload: credential.user.toJSON()
                     });
-                    return credential.user.toJSON();
+                    return credential.user
                 }
                 else {
                     return Promise.reject();

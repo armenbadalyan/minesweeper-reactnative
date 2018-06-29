@@ -14,6 +14,8 @@ const initialState = {
     }
 };
 
+const SUBMIT_SCORE = 'SUBMIT_SCORE';
+
 //reducer
 export default (state = initialState, action) => {
     const payload = action.payload;
@@ -42,38 +44,36 @@ export default (state = initialState, action) => {
 export function saveScore(score, difficulty) {
     return (dispatch, getState) => {
         const user = getState().auth.user,
+            bestScore = getState().score.bestScore,
             timestamp = Date.now();
-        console.log(user);
-        if (user) {
-            console.log('save score');
+        
+        if (user) {            
             firebase.firestore()
-                .collection('scores')
+                .collection('commands')
                 .add({
-                    user: {
-                        uid: user.uid,
-                        displayName: user.displayName,
-                        photo: user.photoURL
-                    },
-                    score,
-                    difficulty,
-                    timestamp
-                })
-                .then(() => {
-                    console.log('score saved');                
+                    type: SUBMIT_SCORE,
+                    uid: user.uid,
+                    payload: {
+                        score,
+                        difficulty,
+                        timestamp
+                    }                    
                 })
                 .catch(err => {
                     console.log(err);
                 });
 
-            dispatch({
-                type: UPDATE_BEST_SCORE,
-                payload: {
-                    [difficulty]: {
-                        score,
-                        timestamp
+            if (bestScore[difficulty] === null || score < bestScore[difficulty].score) {
+                dispatch({
+                    type: UPDATE_BEST_SCORE,
+                    payload: {
+                        [difficulty]: {
+                            score,
+                            timestamp
+                        }
                     }
-                }
-            });
+                });
+            }            
 
             dispatch({
                 type: SET_LAST_SCORE,

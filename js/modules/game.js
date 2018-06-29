@@ -367,7 +367,8 @@ function openCell(cellId, field) {
 
         field.cells[cell.id] = {
             ...cell,
-            closed: false
+            closed: false,
+            flagged: false
         }
 
         while (cellStack.length) {

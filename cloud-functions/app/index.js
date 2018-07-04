@@ -1,7 +1,12 @@
 require("babel-polyfill");
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-admin.initializeApp();
+
+const serviceAccount = require('./service-account.json');
+const adminConfig = JSON.parse(process.env.FIREBASE_CONFIG);
+
+adminConfig.credential = admin.credential.cert(serviceAccount);
+admin.initializeApp(adminConfig);
 
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
@@ -28,6 +33,7 @@ exports.addUserDetails = functions.auth.user()
         });
     });
 
+
 exports.processCommand = functions.firestore
     .document('commands/{commandId}')
     .onCreate(async (snap, context) => {
@@ -39,12 +45,15 @@ exports.processCommand = functions.firestore
                 case 'SUBMIT_SCORE':
                     await processScore(command);
                     break;
+                case 'UPDATE_PROFILE':
+                    await processProfile(command);
+                    break;
             }
         }
-        catch(err) {
+        catch (err) {
             console.log('Error processing command', err);
         }
-        
+
         return admin.firestore().doc(`commands/${context.params.commandId}`).delete();
     });
 
@@ -87,4 +96,37 @@ function processScore(scoreCommand) {
                 return Promise.reject();
             }
         });
+}
+
+function processProfile(updateProfileCommand) {
+    const { payload, uid } = updateProfileCommand;
+
+    const database = admin.firestore(),
+        getUser = admin.auth().getUser(uid);
+        
+        return getUser.then(userRecord => {
+            const updateProfile = database.collection('user-profiles').doc(uid).update({
+                displayName: userRecord.displayName || '',
+                photo: userRecord.photoURL || ''
+            });
+
+            const updateScores = database.collection('scores').where('uid', '==', uid)
+                .get()
+                .then(querySnapshot => {
+                    let updates = [];
+
+                    querySnapshot.forEach(documentSnapshot => {
+                        updates.push(documentSnapshot.ref.update({
+                            user: {
+                                displayName: userRecord.displayName || '',
+                                photo: userRecord.photoURL || ''
+                            }
+                        }));
+                      });
+
+                    return Promise.all(updates); 
+                });
+
+            return Promise.all([updateProfile, updateScores]);
+        })     
 }

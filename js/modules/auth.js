@@ -82,6 +82,8 @@ export function signInAnonymously() {
                         displayName: `Player${generatePlayerId(4)}`
                     }).then(() => {
                         const user = firebase.auth().currentUser.toJSON();
+
+                        sendUpdateProfileCommand(user.uid);
                         dispatch({
                             type: USER_PROFILE_UPDATE,
                             payload: user
@@ -104,10 +106,22 @@ export function signOut() {
     }
 }
 
+function sendUpdateProfileCommand(uid) {
+    return firebase.firestore()
+        .collection('commands')
+        .add({
+            type: 'UPDATE_PROFILE',
+            uid: uid
+        })
+        .catch(err => {
+            console.log(err);
+        });
+}
+
 function generatePlayerId(n) {
     let id = '';
-    while(n) {
-        id += Math.floor(Math.random()*10);
+    while (n) {
+        id += Math.floor(Math.random() * 10);
         n--;
     }
     return id;

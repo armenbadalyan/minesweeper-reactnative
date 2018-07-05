@@ -10,7 +10,8 @@ import { formatGameTime } from '../../shared/time-utils';
 const mapStateToProps = state => ({
     game: state.game,
     status: state.game.game.status,
-    lastScore: state.score.lastScore
+    lastScore: state.score.lastScore,
+    bestScore: state.score.bestScore
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -75,6 +76,18 @@ export class GameScreen extends Component {
         this.props.initGame(options.difficulty);
     }
 
+    gameScoreReady() {
+        const {status, lastScore} = this.props;
+
+        return status === GameStatus.WON && lastScore;
+    }
+
+    isHighScore() {
+        const {status, lastScore} = this.props;
+
+        return status === GameStatus.WON && lastScore && lastScore.isBestScore;
+    }
+
     render() {
         return (
             <View style={styles.game}>
@@ -86,9 +99,9 @@ export class GameScreen extends Component {
                 { /*<div className="game__separator" />*/}
                 <Minefield field={this.props.game.field} status={this.props.game.game.status} onCellClick={this.handleCellClick} onCellAltClick={this.handleCellAltClick} />
                 { /*<Button title="Convert to mines" onPress={this.handleConvertToMines} /> */}
-                {this.props.status === GameStatus.WON && this.props.lastScore && <View style={styles.winSection}>
+                {this.gameScoreReady() && <View style={styles.winSection}>
                     <GameText style={styles.winMessage}>Completed in {formatGameTime(this.props.lastScore.score, 2)}s</GameText>
-                    <GameText style={styles.highscoreMessage}>New highscore!</GameText>
+                    { this.isHighScore() && <GameText style={styles.highscoreMessage}>New high score!</GameText> }
                 </View>
                 }
             </View>

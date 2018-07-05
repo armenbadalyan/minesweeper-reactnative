@@ -47,6 +47,8 @@ export function saveScore(score, difficulty) {
             bestScore = getState().score.bestScore,
             timestamp = Date.now();
         
+        let isBestScore = false;
+        
         if (user) {            
             firebase.firestore()
                 .collection('commands')
@@ -64,6 +66,7 @@ export function saveScore(score, difficulty) {
                 });
 
             if (bestScore[difficulty] === null || score < bestScore[difficulty].score) {
+                isBestScore = true;
                 dispatch({
                     type: UPDATE_BEST_SCORE,
                     payload: {
@@ -78,8 +81,9 @@ export function saveScore(score, difficulty) {
             dispatch({
                 type: SET_LAST_SCORE,
                 payload: {
-                    score,
-                    timestamp
+                    score,                    
+                    timestamp,
+                    isBestScore
                 }
             });
         }        

@@ -98,8 +98,7 @@ export function restoreScore() {
             return firebase.firestore()
                 .collection('scores')
                 .where('user.uid', '==', user.uid)
-                .get()
-                .then((snapshot) => {
+                .onSnapshot((snapshot) => {
                     snapshot.forEach(doc => {
                         const {score, difficulty, timestamp} = doc.data();
                         dispatch({
@@ -112,7 +111,7 @@ export function restoreScore() {
                             }
                         });
                     });
-                })
+                });
         }
         else {
             return Promise.reject();

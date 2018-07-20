@@ -7,6 +7,7 @@ import { restoreScore } from '../../modules/score';
 import { DifficultyLevel } from '../../modules/game';
 import Button from '../../components/Button';
 import GameText from '../../components/GameText';
+import HighScores from '../../components/HighScores';
 import { BG_MAIN_COLOR } from '../../constants';
 import logo from '../../assets/logo.png';
 import { formatGameTime } from '../../shared/time-utils';
@@ -17,31 +18,17 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-    restoreAuthentication: () => {
-        return dispatch(restoreAuthentication());
-    },
-    restoreScore: () => {
-        return dispatch(restoreScore())
-    },
     signOut: () => {
         return dispatch(signOut());
     }
 });
 
+const highScoreLabels = {
+    [DifficultyLevel.BEGINNER]: 'Bgnr',
+    [DifficultyLevel.INTERMEDIATE]: 'Intrm'
+}
+
 export class MainScreen extends Component {
-
-    componentDidMount() {
-        console.log('restoreAuthenication');
-
-        const {restoreAuthentication, restoreScore} = this.props;
-
-        restoreAuthentication()
-            .then(restoreScore)
-            .catch(err => {
-                // TODO: don't forget to handle me
-                console.log(err);
-            });
-    }
 
     startBeginnerGame = () => {
         this.navigateToGameScreen({
@@ -61,11 +48,23 @@ export class MainScreen extends Component {
         });
     }
 
+    getListOfScores(bestScore) {
+        return Object.values(DifficultyLevel).map(level => {
+            if (bestScore[level]) {
+                return {
+                    label: highScoreLabels[level] || '',
+                    score: bestScore.beginner ? formatGameTime(bestScore.beginner.score, 2) : 'NA'
+                }
+            }
+            else {
+                return null;
+            }            
+        }).filter(score => score !== null);
+    }
+
     render() {
         const bestScore = this.props.bestScore;
-        const beginnerScore = bestScore.beginner ? formatGameTime(bestScore.beginner.score, 2) : 'NA';
-        const intermediateScore = bestScore.intermediate ? formatGameTime(bestScore.intermediate.score, 2) : 'NA';
-        const expertScore = bestScore.expert ? formatGameTime(bestScore.expert.score, 2) : 'NA';
+        const scoreList = this.getListOfScores(bestScore);
 
         return (<View style={styles.screen}>
             <View style={[styles.row, styles['row-flex-1']]}>
@@ -81,24 +80,7 @@ export class MainScreen extends Component {
                 {this.props.auth.user && <Button title="SIGN OUT" style={styles.button} onPress={this.props.signOut} />}
             </View>            
             <View style={[styles.row, styles['row-flex-1']]}>
-                {this.props.auth.user && <GameText style={{marginBottom: 20}}>HIGH SCORES</GameText>}
-                {this.props.auth.user && <View style={{width: '70%'}}>
-                    <View style={{flexDirection: 'row', width: '100%', justifyContent: 'space-between'}}>
-                        <View style={{flex: 1, alignItems: 'center'}}>
-                            <GameText>Bgnr</GameText>
-                            <GameText>{ beginnerScore }</GameText>
-                        </View>
-                        <View style={{flex: 1, alignItems: 'center'}}>
-                            <GameText>Intrm</GameText>
-                            <GameText>{ intermediateScore }</GameText>
-                        </View>
-                        <View style={{flex: 1, alignItems: 'center'}}>
-                            <GameText>Xprt</GameText>
-                            <GameText>{ expertScore }</GameText>
-                        </View>                      
-                    </View>                                  
-                </View>}
-                
+                {!!scoreList.length && <HighScores scores={scoreList} />}                
             </View>
         </View>);
     }

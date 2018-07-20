@@ -1,7 +1,11 @@
 import firebase from 'react-native-firebase';
 
 // Actions
+
+import { SIGN_OUT } from './auth';
+
 export const UPDATE_BEST_SCORE = 'score/UPDATE_BEST_SCORE';
+export const SET_SCORE_SUBMITTED = 'score/SET_SCORE_SUBMITTED';
 export const SET_LAST_SCORE = 'score/SET_LAST_SCORE';
 
 // default state
@@ -28,10 +32,26 @@ export default (state = initialState, action) => {
                     ...payload
                 }
             }
+        case SET_SCORE_SUBMITTED:
+            return {
+                ...state,
+                bestScore: {
+                    ...state.bestScore,
+                    [payload.difficulty]: {
+                        ...state.bestScore[payload.difficulty],
+                        submitted: true
+                    }                    
+                }
+            }
         case SET_LAST_SCORE: {
             return {
                 ...state,
                 lastScore: payload
+            }
+        }
+        case SIGN_OUT: {
+            return {
+                ...initialState
             }
         }
         default:
@@ -63,30 +83,31 @@ export function saveScore(score, difficulty) {
                 })
                 .catch(err => {
                     console.log(err);
-                });
+                });            
+        }
 
-            if (bestScore[difficulty] === null || score < bestScore[difficulty].score) {
-                isBestScore = true;
-                dispatch({
-                    type: UPDATE_BEST_SCORE,
-                    payload: {
-                        [difficulty]: {
-                            score,
-                            timestamp
-                        }
-                    }
-                });
-            }            
-
+        if (bestScore[difficulty] === null || score < bestScore[difficulty].score) {
+            isBestScore = true;
             dispatch({
-                type: SET_LAST_SCORE,
+                type: UPDATE_BEST_SCORE,
                 payload: {
-                    score,                    
-                    timestamp,
-                    isBestScore
+                    [difficulty]: {
+                        score,
+                        submitted: !!user,
+                        timestamp
+                    }
                 }
             });
-        }        
+        }            
+
+        dispatch({
+            type: SET_LAST_SCORE,
+            payload: {
+                score,                    
+                timestamp,
+                isBestScore
+            }
+        });        
     }
 }
 
@@ -106,7 +127,8 @@ export function restoreScore() {
                             payload: {
                                 [difficulty]: {
                                     score,
-                                    timestamp
+                                    timestamp,
+                                    submitted: true
                                 }
                             }
                         });
@@ -117,4 +139,50 @@ export function restoreScore() {
             return Promise.reject();
         }
     }
+}
+
+export function submitOfflineScores() {
+    return (dispatch, getState) => {
+        const bestScore = getState().score.bestScore;
+        
+        const submissions = Object.keys(bestScore)
+            .filter(difficulty => bestScore[difficulty] !== null && !bestScore[difficulty].submitted)
+            .map(difficulty => {
+                console.log(bestScore[difficulty]);
+                return dispatch(submitScore(bestScore[difficulty], difficulty));
+            });
+
+        return Promise.all(submissions);
+    }
+}
+
+function submitScore(scoreData, difficulty) {
+    return (dispatch, getState) => {
+        const user = getState().auth.user;
+        if (user) {            
+            return firebase.firestore()
+                .collection('commands')
+                .add({
+                    type: SUBMIT_SCORE,
+                    uid: user.uid,
+                    payload: {
+                        score: scoreData.score,
+                        difficulty: difficulty,
+                        timestamp: scoreData.timestamp
+                    }                    
+                })
+                .then(() => {
+                    dispatch({
+                        type: SET_SCORE_SUBMITTED,
+                        payload: {
+                            difficulty: difficulty
+                        }
+                    });
+                })           
+        }
+        else {
+            return Promise.reject('User not authneticated');
+        }
+    }
+    
 }

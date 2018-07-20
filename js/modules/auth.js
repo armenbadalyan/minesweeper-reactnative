@@ -1,9 +1,9 @@
 import firebase from 'react-native-firebase';
 
 // Actions
-const SIGN_IN = 'auth/SIGN_IN';
-const SIGN_OUT = 'auth/SIGN_OUT';
-const USER_PROFILE_UPDATE = 'auth/USER_PROFILE_UPDATE'
+export const SIGN_IN = 'auth/SIGN_IN';
+export const SIGN_OUT = 'auth/SIGN_OUT';
+export const USER_PROFILE_UPDATE = 'auth/USER_PROFILE_UPDATE'
 
 // default state
 const initialState = {

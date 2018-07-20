@@ -69,25 +69,28 @@ export function saveScore(score, difficulty) {
         
         let isBestScore = false;
         
-        if (user) {            
-            firebase.firestore()
-                .collection('commands')
-                .add({
-                    type: SUBMIT_SCORE,
-                    uid: user.uid,
-                    payload: {
-                        score,
-                        difficulty,
-                        timestamp
-                    }                    
-                })
-                .catch(err => {
-                    console.log(err);
-                });            
-        }
-
         if (bestScore[difficulty] === null || score < bestScore[difficulty].score) {
             isBestScore = true;
+
+            // save high score to server
+            if (user) {            
+                firebase.firestore()
+                    .collection('commands')
+                    .add({
+                        type: SUBMIT_SCORE,
+                        uid: user.uid,
+                        payload: {
+                            score,
+                            difficulty,
+                            timestamp
+                        }                    
+                    })
+                    .catch(err => {
+                        console.log(err);
+                    });            
+            }
+
+            // update high score in store
             dispatch({
                 type: UPDATE_BEST_SCORE,
                 payload: {

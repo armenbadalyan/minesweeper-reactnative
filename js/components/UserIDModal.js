@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Modal, View, TextInput, StyleSheet } from 'react-native';
 import Button from './Button';
 import GameText from './GameText';
-import { BG_MAIN_COLOR, BORDER1_COLOR, BORDER2_COLOR } from '../constants';
+import { BG_MAIN_COLOR, BORDER1_COLOR, BORDER2_COLOR, LIGHT_BLUE } from '../constants';
 
 export default class UserIDModal extends Component {
 
@@ -40,7 +40,10 @@ export default class UserIDModal extends Component {
             <View style={styles.outer}>
                 <View style={styles.inner}>
                     <GameText style={styles.message}>The world wants to know its hero!</GameText>
-                    <TextInput ref={(ref => this.input = ref)} defaultValue={this.props.defaultValue} />
+                    <TextInput ref={(ref => this.input = ref)}
+                        defaultValue={this.props.defaultValue}
+                        selectTextOnFocus={true}
+                        style={styles.textInput} />
                     <Button title='Save' onPress={this.props.onSubmit} />
                 </View>                
             </View>
@@ -78,5 +81,9 @@ const styles = StyleSheet.create({
     },
     message: {
         textAlign: 'center'
+    },
+    textInput: {
+        fontFamily: 'PressStart2P-Regular',
+        color: LIGHT_BLUE
     }
 });

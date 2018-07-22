@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Modal, View, TextInput, StyleSheet } from 'react-native';
 import Button from './Button';
 import GameText from './GameText';
+import { BG_MAIN_COLOR, BORDER1_COLOR, BORDER2_COLOR } from '../constants';
 
 export default class UserIDModal extends Component {
 
@@ -22,11 +23,11 @@ export default class UserIDModal extends Component {
         });
     }
 
-    onSubmit() {
+    onSubmit = () => {
         this.props.onSubmit(this.input.value);
     }
 
-    onRequestClose() {
+    onRequestClose = () => {
         this.hide();
     }
 
@@ -50,6 +51,7 @@ export default class UserIDModal extends Component {
 UserIDModal.propTypes = {
     isShown: PropTypes.bool,
     userName: PropTypes.string,
+    defaultValue: PropTypes.string,
     onSubmit: PropTypes.func
 }
 
@@ -64,9 +66,15 @@ const styles = StyleSheet.create({
     },
     inner: {
         flexDirection: 'column',
-        backgroundColor: '#C0C0C0',
+        backgroundColor: BG_MAIN_COLOR,
         alignItems: 'stretch',
-        padding: 20
+        padding: 20,
+        borderWidth: 3,
+        borderStyle: 'solid',
+        borderLeftColor: BORDER1_COLOR,
+        borderTopColor: BORDER1_COLOR,
+        borderRightColor: BORDER2_COLOR,
+        borderBottomColor: BORDER2_COLOR,
     },
     message: {
         textAlign: 'center'

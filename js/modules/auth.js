@@ -78,22 +78,31 @@ export function signInAnonymously() {
             })
             .then(user => {
                 if (!user.displayName) {
-                    return user.updateProfile({
-                        displayName: `Player${generatePlayerId(4)}`
-                    }).then(() => {
-                        const user = firebase.auth().currentUser.toJSON();
-
-                        sendUpdateProfileCommand(user.uid);
-                        dispatch({
-                            type: USER_PROFILE_UPDATE,
-                            payload: user
-                        });
-                        return user;
-                    });
+                    return dispatch(updateProfile(`Player${generatePlayerId(4)}`));                    
                 }
                 return user.toJSON();
             });
     }
+}
+
+export function updateProfile(displayName) {
+    return (dispatch, getState) => {
+        let user = firebase.auth().currentUser;
+
+        return user.updateProfile({
+            displayName
+        }).then(() => {
+            user = firebase.auth().currentUser.toJSON();
+    
+            sendUpdateProfileCommand(user.uid);
+            dispatch({
+                type: USER_PROFILE_UPDATE,
+                payload: user
+            });
+            return user;
+        });
+    }
+    
 }
 
 export function signOut() {

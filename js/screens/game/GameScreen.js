@@ -2,12 +2,16 @@ import React, { Component } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { connect } from 'react-redux';
 import { initGame, cellClick, cellAltClick, convertToMines, GameStatus } from '../../modules/game';
+import { updateProfile } from '../../modules/auth';
 import StatBoard from '../../components/statboard/StatBoard';
 import Minefield from '../../components/minefield/Minefield';
 import GameText from '../../components/GameText';
+import UserIDModal from '../../components/UserIDModal';
 import { formatGameTime } from '../../shared/time-utils';
 
 const mapStateToProps = state => ({
+    user: state.auth.user,
+    preferences: state.preferences,
     game: state.game,
     status: state.game.game.status,
     lastScore: state.score.lastScore,
@@ -26,6 +30,9 @@ const mapDispatchToProps = dispatch => ({
     },
     convertToMines: () => {
         dispatch(convertToMines());
+    },
+    updateProfile: (displayName) => {
+        dispatch(updateProfile(displayName));
     }
 });
 
@@ -42,6 +49,15 @@ export class GameScreen extends Component {
 
     componentDidMount() {
         this.startGameWithOptions(this.props.navigation.getParam('gameOptions'));
+    }
+
+    componentDidUpdate(prevProps) {
+        if (prevProps.status !== GameStatus.WON
+            && this.isHighScore()
+            && this.userAvailable()
+            && !this.userModalAknowledged()) {
+            this.modal.show();
+        }
     }
 
     countFlaggedMines(field) {
@@ -77,15 +93,28 @@ export class GameScreen extends Component {
     }
 
     gameScoreReady() {
-        const {status, lastScore} = this.props;
+        const { status, lastScore } = this.props;
 
         return status === GameStatus.WON && lastScore;
     }
 
+    onSubmitUser = (displayName) => {
+        this.modal.hide();
+        updateProfile(displayName);
+    }
+
     isHighScore() {
-        const {status, lastScore} = this.props;
+        const { status, lastScore } = this.props;
 
         return status === GameStatus.WON && lastScore && lastScore.isBestScore;
+    }
+
+    userAvailable() {
+        return this.props.user;
+    }
+
+    userModalAknowledged() {
+        return this.props.preferences.userModalAknowledged;
     }
 
     render() {
@@ -101,9 +130,14 @@ export class GameScreen extends Component {
                 { /*<Button title="Convert to mines" onPress={this.handleConvertToMines} /> */}
                 {this.gameScoreReady() && <View style={styles.winSection}>
                     <GameText style={styles.winMessage}>Completed in {formatGameTime(this.props.lastScore.score, 2)}s</GameText>
-                    { this.isHighScore() && <GameText style={styles.highscoreMessage}>New high score!</GameText> }
+                    {this.isHighScore() && <GameText style={styles.highscoreMessage}>New high score!</GameText>}
                 </View>
                 }
+
+                <UserIDModal ref={ref => this.modal = ref}
+                    defaultValue={this.props.user && this.props.user.displayName}
+                    onSubmit={this.onSubmitUser} />
+
             </View>
         );
     }

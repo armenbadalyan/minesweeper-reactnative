@@ -30,7 +30,6 @@ export default class Button extends Component {
 
 const styles = StyleSheet.create({
     button: {
-        width: '100%',
         height: 40,
         backgroundColor: BG_MAIN_COLOR,
         borderWidth: 3,

@@ -13,6 +13,7 @@ import { restoreScore, submitOfflineScores } from './modules/score';
 import MainScreen from './screens/main/MainScreen';
 import GameScreen from './screens/game/GameScreen';
 import LeaderboardScreen from './screens/leaderboard/LeaderboardScreen';
+import { connectivityAvailable } from './shared/connection';
 import MessageQueue from 'react-native/Libraries/BatchedBridge/MessageQueue.js';
 
 const RootStack = StackNavigator(
@@ -49,10 +50,6 @@ async function bootstrap() {
     else {
         syncAfterNetworkChange();
     }
-}
-
-function connectivityAvailable() {
-   return NetInfo.isConnected.fetch();
 }
 
 async function loginAndSyncGameData() {

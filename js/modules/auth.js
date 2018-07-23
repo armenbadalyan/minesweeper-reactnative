@@ -88,7 +88,7 @@ export function signInAnonymously() {
 export function updateProfile(displayName) {
     return (dispatch, getState) => {
         let user = firebase.auth().currentUser;
-
+        
         return user.updateProfile({
             displayName
         }).then(() => {

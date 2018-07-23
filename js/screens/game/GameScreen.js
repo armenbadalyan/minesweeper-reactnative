@@ -3,11 +3,13 @@ import { View, StyleSheet } from 'react-native';
 import { connect } from 'react-redux';
 import { initGame, cellClick, cellAltClick, convertToMines, GameStatus } from '../../modules/game';
 import { updateProfile } from '../../modules/auth';
+import { aknowledgeUserModal } from '../../modules/preferences';
 import StatBoard from '../../components/statboard/StatBoard';
 import Minefield from '../../components/minefield/Minefield';
 import GameText from '../../components/GameText';
 import UserIDModal from '../../components/UserIDModal';
 import { formatGameTime } from '../../shared/time-utils';
+import { connectivityAvailable } from '../../shared/connection';
 
 const mapStateToProps = state => ({
     user: state.auth.user,
@@ -33,6 +35,9 @@ const mapDispatchToProps = dispatch => ({
     },
     updateProfile: (displayName) => {
         dispatch(updateProfile(displayName));
+    },
+    aknowledgeUserModal: () => {
+        dispatch(aknowledgeUserModal());
     }
 });
 
@@ -51,8 +56,9 @@ export class GameScreen extends Component {
         this.startGameWithOptions(this.props.navigation.getParam('gameOptions'));
     }
 
-    componentDidUpdate(prevProps) {
+    async componentDidUpdate(prevProps) {
         if (prevProps.status !== GameStatus.WON
+            && await connectivityAvailable()
             && this.isHighScore()
             && this.userAvailable()
             && !this.userModalAknowledged()) {
@@ -98,9 +104,10 @@ export class GameScreen extends Component {
         return status === GameStatus.WON && lastScore;
     }
 
-    onSubmitUser = (displayName) => {
+    onSubmitUser = async (displayName) => {
         this.modal.hide();
-        updateProfile(displayName);
+        this.props.updateProfile(displayName);
+        this.props.aknowledgeUserModal();
     }
 
     isHighScore() {

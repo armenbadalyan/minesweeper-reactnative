@@ -11,6 +11,8 @@ export default class UserIDModal extends Component {
         visible: false
     }
 
+    userName = this.props.defaultValue
+
     show() {
         this.setState({
             visible: true
@@ -24,7 +26,7 @@ export default class UserIDModal extends Component {
     }
 
     onSubmit = () => {
-        this.props.onSubmit(this.input.value);
+        this.props.onSubmit(this.userName);
     }
 
     onRequestClose = () => {
@@ -43,8 +45,11 @@ export default class UserIDModal extends Component {
                     <TextInput ref={(ref => this.input = ref)}
                         defaultValue={this.props.defaultValue}
                         selectTextOnFocus={true}
-                        style={styles.textInput} />
-                    <Button title='Save' onPress={this.props.onSubmit} />
+                        style={styles.textInput}
+                        onChangeText={(text) => {
+                            this.userName = text;
+                        }} />
+                    <Button title='Save' onPress={this.onSubmit} />
                 </View>                
             </View>
         </Modal>);

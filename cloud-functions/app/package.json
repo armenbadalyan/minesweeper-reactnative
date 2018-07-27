@@ -13,7 +13,8 @@
     "babel-polyfill": "^6.26.0",
     "core-js": "^2.5.7",
     "firebase-admin": "~5.12.1",
-    "firebase-functions": "^1.0.3"
+    "firebase-functions": "^1.0.3",
+    "moment": "^2.22.2"
   },
   "devDependencies": {
     "eslint": "^4.12.0",

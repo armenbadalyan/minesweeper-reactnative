@@ -69,26 +69,26 @@ export function saveScore(score, difficulty) {
         
         let isBestScore = false;
         
-        if (bestScore[difficulty] === null || score < bestScore[difficulty].score) {
-            isBestScore = true;
+        // send score to server
+        if (user) {            
+            firebase.firestore()
+                .collection('commands')
+                .add({
+                    type: SUBMIT_SCORE,
+                    uid: user.uid,
+                    payload: {
+                        score,
+                        difficulty
+                    }                    
+                })
+                .catch(err => {
+                    console.log(err);
+                });            
+        }
 
-            // save high score to server
-            if (user) {            
-                firebase.firestore()
-                    .collection('commands')
-                    .add({
-                        type: SUBMIT_SCORE,
-                        uid: user.uid,
-                        payload: {
-                            score,
-                            difficulty,
-                            timestamp
-                        }                    
-                    })
-                    .catch(err => {
-                        console.log(err);
-                    });            
-            }
+
+        if (bestScore[difficulty] === null || score < bestScore[difficulty].score) {
+            isBestScore = true;           
 
             // update high score in store
             dispatch({
@@ -120,7 +120,7 @@ export function restoreScore() {
         console.log('restoreScore');
         if (user) {
             return firebase.firestore()
-                .collection('scores')
+                .collection('scores_overall')
                 .where('user.uid', '==', user.uid)
                 .onSnapshot((snapshot) => {
                     snapshot.forEach(doc => {
@@ -170,8 +170,7 @@ function submitScore(scoreData, difficulty) {
                     uid: user.uid,
                     payload: {
                         score: scoreData.score,
-                        difficulty: difficulty,
-                        timestamp: scoreData.timestamp
+                        difficulty: difficulty
                     }                    
                 })
                 .then(() => {

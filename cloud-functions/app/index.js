@@ -1,6 +1,7 @@
 require("babel-polyfill");
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
+const moment = require('moment');
 
 const serviceAccount = require('./service-account.json');
 const adminConfig = JSON.parse(process.env.FIREBASE_CONFIG);
@@ -20,6 +21,18 @@ const DifficultyLevel = {
     BEGINNER: 'beginner',
     INTERMEDIATE: 'intermediate',
     EXPERT: 'expert'
+}
+
+const scopeStart = {
+    daily: () => {
+        return moment().utc().startOf('day').valueOf()
+    },
+    weekly: () => {
+        return moment().utc().startOf('week').valueOf()
+    },
+    overall: () => {
+        return 0
+    }
 }
 
 exports.processCommand = functions.firestore
@@ -48,48 +61,102 @@ exports.processCommand = functions.firestore
     });
 
 
-function processScore(scoreCommand) {
-    const { payload, uid, payload: { score, difficulty, timestamp } } = scoreCommand;
+async function processScore(scoreCommand) {
+    const { payload, uid, payload: { score, difficulty } } = scoreCommand;
 
     if (!payload || !uid) {
         return Promise.reject('missing uid or payload');
     }
 
-    if (score <= 0 && timestamp <= 0) {
-        return Promise.reject('invalid score or timestamp');
+    if (score <= 0) {
+        return Promise.reject('invalid score');
     }
 
     if (Object.values(DifficultyLevel).indexOf(difficulty) === -1) {
         return Promise.reject('invalid difficulty level provided');
     }
 
-    const database = admin.firestore(),
-        getUser = admin.auth().getUser(uid),        
-        getScore = database.doc(`scores/${uid}_${difficulty}`).get();
+    let scopes = ['daily', 'weekly', 'overall'],
+        checkNextScope = true;
+
+    while (scopes.length && checkNextScope) {
+        const scope = scopes.shift(),
+            scoreSnapshot = await getScore(uid, difficulty, scope);
 
 
-    return Promise.all([getUser, getScore])
-        .then(([userRecord, scoreSnap]) => {            
-            const scoreData = scoreSnap.data();
-            if (!scoreData || scoreData.score > score) {
-                console.log(`saving new high score ${score} for user`, userRecord);
-                return database.doc(`scores/${uid}_${difficulty}`)
-                    .set({
-                        score,
-                        uid,
-                        difficulty,
-                        timestamp,
-                        user: {
-                            displayName: userRecord.displayName || '',
-                            photo: userRecord.photoURL || '',
-                            uid: userRecord.uid
-                        }
-                    })
+        if (scoreSnapshot) {
+            if (scoreImproved(scoreSnapshot.data(), score, scope)) {
+                updateScore(scoreSnapshot.id, uid, difficulty, score, Date.now(), scope);
             }
-            else {
-                return Promise.reject('provided score is not the best');
-            }
+        }
+        else {
+            addScore(uid, difficulty, score, Date.now(), scope);
+        }
+    }
+
+
+}
+
+function getScore(uid, difficulty, scope) {
+    const database = admin.firestore()
+    return database.collection(`scores_${scope}`)
+        .where('uid', '==', uid)
+        .where('difficulty', '==', difficulty)
+        .get()
+        .then(snapshot => snapshot.empty ? null : snapshot.docs[0]);
+}
+
+function updateScore(scoreId, uid, difficulty, score, timestamp, scope) {
+    const database = admin.firestore();
+
+    return admin.auth().getUser(uid)
+        .then(userRecord => {
+            console.log(`updating ${difficulty} high score ${score} in ${scope} scope for user`, userRecord);
+
+            return database.doc(`scores_${scope}/${scoreId}`)
+                .set(buildScoreDocumentData(userRecord, difficulty, score, timestamp));
         });
+}
+
+function addScore(uid, difficulty, score, timestamp, scope) {
+    const database = admin.firestore();
+
+    return admin.auth().getUser(uid)
+        .then(userRecord => {
+            console.log(`saving ${difficulty} new high score ${score} in ${scope} scope for user`, userRecord);
+
+            return database.collection(`scores_${scope}`)
+                .add(buildScoreDocumentData(userRecord, difficulty, score, timestamp));
+        });
+}
+
+function buildScoreDocumentData(user, difficulty, score, timestamp) {
+    return {
+        score,
+        uid: user.uid,
+        difficulty,
+        timestamp,
+        user: {
+            displayName: user.displayName || '',
+            photo: user.photoURL || '',
+            uid: user.uid
+        }
+    }
+}
+
+function scoreImproved(prevScoreData, score, scope) {
+
+    // prev  score was recorded before scope start date
+    if (prevScoreData.timestamp < scopeStart[scope]()) {
+        return true;
+    }
+
+    // new score is better than previous one
+    if (prevScoreData.score > score) {
+        return true;
+    }
+
+    return false;
 }
 
 function processProfile(updateProfileCommand) {
@@ -97,34 +164,41 @@ function processProfile(updateProfileCommand) {
 
     const database = admin.firestore(),
         getUser = admin.auth().getUser(uid);
-        
-        return getUser.then(userRecord => {
-            console.log('updating user profile ', userRecord);
-            const updateProfile = database.collection('user-profiles').doc(uid).set({
-                displayName: userRecord.displayName || '',
-                photo: userRecord.photoURL || '',
-                uid: userRecord.uid
+
+    return getUser.then(userRecord => {
+        console.log('updating user profile ', userRecord);
+        const updateProfile = database.collection('user-profiles').doc(uid).set({
+            displayName: userRecord.displayName || '',
+            photo: userRecord.photoURL || '',
+            uid: userRecord.uid
+        });
+
+        return Promise.all([updateProfile,
+            updateProfileInScores(userRecord, 'daily'),
+            updateProfileInScores(userRecord, 'weekly'),
+            updateProfileInScores(userRecord, 'overall')]);
+    })
+}
+
+function updateProfileInScores(userRecord, scope) {
+    const database = admin.firestore();
+
+    return database.collection(`scores_${scope}`).where('uid', '==', userRecord.uid)
+        .get()
+        .then(querySnapshot => {
+            let updates = [];
+
+            querySnapshot.forEach(documentSnapshot => {
+                console.log(`updating displayName in score with scope ${scope}`, documentSnapshot);
+                updates.push(documentSnapshot.ref.update({
+                    user: {
+                        displayName: userRecord.displayName || '',
+                        photo: userRecord.photoURL || '',
+                        uid: userRecord.uid
+                    }
+                }));
             });
 
-            const updateScores = database.collection('scores').where('uid', '==', uid)
-                .get()
-                .then(querySnapshot => {
-                    let updates = [];
-
-                    querySnapshot.forEach(documentSnapshot => {
-                        console.log('updating displayName in score ', documentSnapshot);
-                        updates.push(documentSnapshot.ref.update({
-                            user: {
-                                displayName: userRecord.displayName || '',
-                                photo: userRecord.photoURL || '',
-                                uid: userRecord.uid
-                            }
-                        }));
-                      });
-
-                    return Promise.all(updates); 
-                });
-
-            return Promise.all([updateProfile, updateScores]);
-        })     
+            return Promise.all(updates);
+        });
 }

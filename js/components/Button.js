@@ -23,7 +23,7 @@ export default class Button extends Component {
 
     render() {
         return (<TouchableWithoutFeedback onPress={this.props.onPress} onPressIn={this.onPressIn} onPressOut={this.onPressOut}>
-            <View style={[styles.button, this.state.isPressed ? styles.buttonPressed : null, this.props.style]}><Text style={styles.title}>{this.props.title}</Text></View>
+            <View style={[styles.button, this.state.isPressed ? styles.buttonPressed : null, this.props.style]}><Text style={[styles.title, this.props.titleStyle]}>{this.props.title}</Text></View>
         </TouchableWithoutFeedback>);
     } 
 }
@@ -39,7 +39,9 @@ const styles = StyleSheet.create({
         borderRightColor: BORDER2_COLOR,
         borderBottomColor: BORDER2_COLOR,
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        paddingLeft: 5,
+        paddingRight: 5
     },
     buttonPressed: {
         borderLeftColor: BG_ALT_COLOR,
@@ -58,5 +60,6 @@ const styles = StyleSheet.create({
 Button.propTypes = {
     title: PropTypes.string,
     onPress: PropTypes.func,
-    style: PropTypes.number
+    style: PropTypes.number,
+    titleStyle: PropTypes.number
 }

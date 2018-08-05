@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { View, Image, StyleSheet} from 'react-native';
+import { View, Image, StyleSheet } from 'react-native';
 import { restoreAuthentication, signOut } from '../../modules/auth';
 import { restoreScore } from '../../modules/score';
 import { DifficultyLevel } from '../../modules/game';
@@ -48,6 +48,10 @@ export class MainScreen extends Component {
         });
     }
 
+    navigateToLeaderboard = () => {
+        this.props.navigation.navigate('Leaderboard')
+    }
+
     getListOfScores(bestScore) {
         return Object.values(DifficultyLevel).map(level => {
             if (bestScore[level]) {
@@ -58,7 +62,7 @@ export class MainScreen extends Component {
             }
             else {
                 return null;
-            }            
+            }
         }).filter(score => score !== null);
     }
 
@@ -72,15 +76,15 @@ export class MainScreen extends Component {
             </View>
             <View style={[styles.row, styles.greeting]}>
                 {this.props.auth.user && <GameText numberOfLines={1} ellipsizeMode="tail" style={styles.greetingText}>Hello, {this.props.auth.user.displayName}</GameText>}
-            </View>            
+            </View>
             <View style={styles.row}>
                 <Button title="BEGINNER" onPress={this.startBeginnerGame} style={styles.button} />
                 <Button title="INTERMEDIATE" onPress={this.startIntermediateGame} style={styles.button} />
-                <Button title="LEADERBOARD" style={styles.button} />
+                <Button title="LEADERBOARD" style={styles.button} onPress={this.navigateToLeaderboard} />
                 {this.props.auth.user && <Button title="SIGN OUT" style={styles.button} onPress={this.props.signOut} />}
-            </View>            
+            </View>
             <View style={[styles.row, styles['row-flex-1']]}>
-                {!!scoreList.length && <HighScores scores={scoreList} />}                
+                {!!scoreList.length && <HighScores scores={scoreList} />}
             </View>
         </View>);
     }
@@ -110,7 +114,7 @@ const styles = StyleSheet.create({
     },
     button: {
         width: '70%',
-        marginBottom: 20        
+        marginBottom: 20
     },
     logo: {
         width: 100,
@@ -118,7 +122,7 @@ const styles = StyleSheet.create({
     },
     greeting: {
         height: 40,
-        marginBottom: 20        
+        marginBottom: 20
     },
     greetingText: {
         width: '70%',

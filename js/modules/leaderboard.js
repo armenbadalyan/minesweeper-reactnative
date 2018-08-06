@@ -80,7 +80,7 @@ export function fetchLeaders(level, period) {
 
                 snapshots.forEach(snapshot => {
                     leaders.push({
-                        user: snapshot.data(),
+                        score: snapshot.data(),
                         rank: ++idx
                     });
                 });
@@ -93,7 +93,8 @@ export function fetchLeaders(level, period) {
             });
 
 
-        return Promise.all([getLeaders]).then(leaders => {
+        return Promise.all([getLeaders]).then(([leaders]) => {
+            console.log(leaders);
             dispatch({
                 type: UPDATE_LEADERS,
                 payload: leaders

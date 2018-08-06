@@ -12,7 +12,9 @@ import commonStyles from '../../shared/styles'
 
 const mapStateToProps = state => ({
 	auth: state.auth,
-	leaderboard: state.leaderboard
+	leaders: state.leaderboard.leaders,
+	selectedLevel: state.leaderboard.selectedLevel,
+	selectedPeriod: state.leaderboard.selectedPeriod
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -41,8 +43,7 @@ const periods = [
 export class LeaderboardScreen extends Component {
 
 	componentDidMount() {
-		const { selectedLevel, selectedPeriod } = this.props.leaderboard;
-		this.props.fetchLeaders(selectedLevel, selectedPeriod);
+		this.props.fetchLeaders(this.props.selectedLevel, this.props.selectedPeriod);
 	}
 
 	getLevelIndex(levelId) {
@@ -89,6 +90,14 @@ export class LeaderboardScreen extends Component {
 			selected={highlighted} />);
 	}
 
+	renderLeader({item}) {
+		return (<View style={{flexDirection: 'row', justifyContent: 'space-between'}} key={item.rank}>
+			<Text>{item.rank}.</Text>
+			<Text>{item.score.user.displayName}</Text>
+			<Text>{item.score.score}</Text>
+		</View>);
+	}
+
 
 	render() {
 		return (<View style={styles.screen}>
@@ -99,10 +108,10 @@ export class LeaderboardScreen extends Component {
 					<ModalDropdown ref={ref => this.levelDD = ref} style={{ flex: 1 }}
 						dropdownStyle={{ height: 'auto' }}
 						options={levels}
-						defaultIndex={this.getLevelIndex(this.props.leaderboard.selectedLevel)}
+						defaultIndex={this.getLevelIndex(this.props.selectedLevel)}
 						renderRow={this.renderOptionRow}
 						onSelect={this.onLevelSelected}>
-						<Button title={this.getLevelLabel(this.props.leaderboard.selectedLevel)} style={styles.filterButton} titleStyle={styles.filterButtonTitle}
+						<Button title={this.getLevelLabel(this.props.selectedLevel)} style={styles.filterButton} titleStyle={styles.filterButtonTitle}
 							onPress={() => { this.levelDD.show() }} />
 					</ModalDropdown>
 				</View>
@@ -111,17 +120,17 @@ export class LeaderboardScreen extends Component {
 					<ModalDropdown ref={ref => this.periodDD = ref} style={{ flex: 1 }}
 						dropdownStyle={{ height: 'auto' }}
 						options={periods}
-						defaultIndex={this.getPeriodIndex(this.props.leaderboard.selectedPeriod)}
+						defaultIndex={this.getPeriodIndex(this.props.selectedPeriod)}
 						renderRow={this.renderOptionRow}
 						onSelect={this.onPeriodSelected}>
-						<Button title={this.getPeriodLabel(this.props.leaderboard.selectedPeriod)} style={styles.filterButton} titleStyle={styles.filterButtonTitle}
+						<Button title={this.getPeriodLabel(this.props.selectedPeriod)} style={styles.filterButton} titleStyle={styles.filterButtonTitle}
 							onPress={() => { this.periodDD.show() }} />
 					</ModalDropdown>
 				</View>
 
 			</View>
 			<View style={[commonStyles.border, styles.leaderboard]}>
-
+				<FlatList data={this.props.leaders} renderItem={this.renderLeader} />
 			</View>
 
 		</View>);

@@ -1,4 +1,5 @@
 import firebase from 'react-native-firebase';
+import moment from 'moment';
 import { DifficultyLevel } from './game';
 
 // Actions
@@ -8,9 +9,21 @@ export const UPDATE_PERIOD = 'leaderboard/UPDATE_PERIOD';
 export const UPDATE_LEADERS = 'leaderboard/UPDATE_LEADERS';
 
 export const RankingPeriod = {
-    DIALY: 'daily',
+    DAILY: 'daily',
     WEEKLY: 'weekly',
     OVERALL: 'overall'
+}
+
+const periodStart = {
+    [RankingPeriod.DAILY]: () => {
+        return moment().utc().startOf('day').valueOf()
+    },
+    [RankingPeriod.WEEKLY]: () => {
+        return moment().utc().startOf('week').valueOf()
+    },
+    [RankingPeriod.OVERALL]: () => {
+        return 0
+    }
 }
 
 // default state
@@ -71,6 +84,8 @@ export function fetchLeaders(level, period) {
         const getLeaders = firebase.firestore()
             .collection(`scores_${period}`)
             .where('difficulty', '==', level)
+            .where('timestamp', '>=', periodStart[period]())
+            .orderBy('timestamp')
             .orderBy('score')
             .limit(10)
             .get()

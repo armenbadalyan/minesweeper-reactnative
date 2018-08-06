@@ -76,10 +76,12 @@ export class LeaderboardScreen extends Component {
 
 	onLevelSelected = (index, value) => {
 		this.props.updateLevel(value.id);
+		this.props.fetchLeaders(value.id, this.props.selectedPeriod);
 	}
 
 	onPeriodSelected = (index, value) => {
 		this.props.updatePeriod(value.id);
+		this.props.fetchLeaders(this.props.selectedLevel, value.id);
 	}
 
 	renderOptionRow = (data, id, highlighted) => {

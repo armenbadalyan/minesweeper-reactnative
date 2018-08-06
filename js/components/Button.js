@@ -21,10 +21,19 @@ export default class Button extends Component {
         });
     }
 
-    render() {
-        return (<TouchableWithoutFeedback onPress={this.props.onPress} onPressIn={this.onPressIn} onPressOut={this.onPressOut}>
-            <View style={[styles.button, this.state.isPressed ? styles.buttonPressed : null, this.props.style]}><Text style={[styles.title, this.props.titleStyle]}>{this.props.title}</Text></View>
-        </TouchableWithoutFeedback>);
+    render() {  
+        const isPressed = this.props.selected || this.state.isPressed;
+        const button = (<View style={[styles.button, isPressed ? styles.buttonPressed : null, this.props.style]}>
+            <Text style={[styles.title, this.props.titleStyle]}>{this.props.title}</Text>
+        </View>);
+        if (this.props.touchable) {
+            return (<TouchableWithoutFeedback onPressIn={this.onPressIn} onPressOut={this.onPressOut} onPress={this.props.onPress}>
+                { button }
+            </TouchableWithoutFeedback>);
+        }
+        else {
+            return button;
+        }
     } 
 }
 
@@ -57,9 +66,15 @@ const styles = StyleSheet.create({
     }
 })
 
+Button.defaultProps = {
+    touchable: true
+}
+
 Button.propTypes = {
     title: PropTypes.string,
     onPress: PropTypes.func,
     style: PropTypes.number,
-    titleStyle: PropTypes.number
+    titleStyle: PropTypes.number,
+    touchable: PropTypes.bool,
+    selected: PropTypes.selected
 }

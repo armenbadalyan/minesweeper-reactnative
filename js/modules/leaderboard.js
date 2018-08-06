@@ -38,8 +38,7 @@ export default (state = initialState, action) => {
         case UPDATE_LEADERS: 
             return {
                 ...state,
-                leaders: payload.leaders,
-                playerRank: payload.playerRank
+                leaders: payload
             }
         default:
             return state;
@@ -69,10 +68,9 @@ export function updatePeriod(period) {
 export function fetchLeaders(level, period) {
     return (dispatch, getState) => {
         const user = getState().auth.user;
-
         const getLeaders = firebase.firestore()
             .collection(`scores_${period}`)
-            .where('level', '==', level)
+            .where('difficulty', '==', level)
             .orderBy('score')
             .limit(10)
             .get()
@@ -82,7 +80,7 @@ export function fetchLeaders(level, period) {
 
                 snapshots.forEach(snapshot => {
                     leaders.push({
-                        user: snapshot.data,
+                        user: snapshot.data(),
                         rank: ++idx
                     });
                 });

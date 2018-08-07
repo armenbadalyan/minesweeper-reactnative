@@ -114,7 +114,7 @@ function updateScore(scoreId, uid, difficulty, score, timestamp, scope) {
             console.log(`updating ${difficulty} high score ${score} in ${scope} scope for user`, userRecord);
 
             return database.doc(`scores_${scope}/${scoreId}`)
-                .set(buildScoreDocumentData(userRecord, difficulty, score, timestamp));
+                .set(buildScoreDocumentData(userRecord, difficulty, score, timestamp, scopeStart[scope]()));
         });
 }
 
@@ -126,16 +126,17 @@ function addScore(uid, difficulty, score, timestamp, scope) {
             console.log(`saving ${difficulty} new high score ${score} in ${scope} scope for user`, userRecord);
 
             return database.collection(`scores_${scope}`)
-                .add(buildScoreDocumentData(userRecord, difficulty, score, timestamp));
+                .add(buildScoreDocumentData(userRecord, difficulty, score, timestamp, scopeStart[scope]()));
         });
 }
 
-function buildScoreDocumentData(user, difficulty, score, timestamp) {
+function buildScoreDocumentData(user, difficulty, score, timestamp, period) {
     return {
         score,
         uid: user.uid,
         difficulty,
         timestamp,
+        period: period,
         user: {
             displayName: user.displayName || '',
             photo: user.photoURL || '',

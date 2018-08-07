@@ -81,11 +81,11 @@ export function updatePeriod(period) {
 export function fetchLeaders(level, period) {
     return (dispatch, getState) => {
         const user = getState().auth.user;
+        console.log(periodStart[period]());
         const getLeaders = firebase.firestore()
             .collection(`scores_${period}`)
             .where('difficulty', '==', level)
-            .where('timestamp', '>=', periodStart[period]())
-            .orderBy('timestamp')
+            .where('period', '==', periodStart[period]())
             .orderBy('score')
             .limit(10)
             .get()

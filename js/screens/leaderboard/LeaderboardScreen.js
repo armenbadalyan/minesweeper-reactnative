@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { View, Text, Image, FlatList, StyleSheet } from 'react-native';
+import { View, FlatList, StyleSheet } from 'react-native';
 import ModalDropdown from 'react-native-modal-dropdown';
 import { connect } from 'react-redux';
 import { updateLevel, updatePeriod, fetchLeaders, RankingPeriod } from '../../modules/leaderboard';
+import RankRow from './RankRow';
 import { DifficultyLevel } from '../../modules/game';
 import Button from '../../components/Button';
 import GameText from '../../components/GameText';
@@ -92,12 +93,8 @@ export class LeaderboardScreen extends Component {
 			selected={highlighted} />);
 	}
 
-	renderLeader({item}) {
-		return (<View style={{flexDirection: 'row', justifyContent: 'space-between'}} key={item.rank}>
-			<Text>{item.rank}.</Text>
-			<Text>{item.score.user.displayName}</Text>
-			<Text>{item.score.score}</Text>
-		</View>);
+	renderLeader({ item }) {
+		return <RankRow key={item.rank} rank={item.rank} score={item.score} />;
 	}
 
 
@@ -142,14 +139,12 @@ export class LeaderboardScreen extends Component {
 export default connect(mapStateToProps, mapDispatchToProps)(LeaderboardScreen);
 
 LeaderboardScreen.propTypes = {
-	leaderboard: PropTypes.shape({
-		selectedLevel: PropTypes.string,
-		selectedPeriod: PropTypes.string,
-		leaders: PropTypes.arrayOf(PropTypes.shape({
-			user: PropTypes.object,
-			rank: PropTypes.number
-		}))
-	}),
+	leaders: PropTypes.arrayOf(PropTypes.shape({
+		user: PropTypes.object,
+		rank: PropTypes.number
+	})),
+	selectedPeriod: PropTypes.string,
+	selectedLevel: PropTypes.string,
 	fetchLeaders: PropTypes.func,
 	updateLevel: PropTypes.func,
 	updatePeriod: PropTypes.func,

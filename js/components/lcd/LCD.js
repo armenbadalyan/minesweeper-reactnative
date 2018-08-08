@@ -3,7 +3,7 @@ import {
     View,
     StyleSheet
 } from 'react-native';
-import Icon from '../icon/icon';
+import Icon from '../Icon';
 
 
 const MAX_LCD_VALUE = 999;

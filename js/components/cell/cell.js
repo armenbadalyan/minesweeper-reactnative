@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import { View, TouchableWithoutFeedback } from 'react-native';
-import Icon from '../icon/icon.js';
+import Icon from '../Icon.js';
 import Styles from './styles.js';
 
 

@@ -1,4 +1,5 @@
 import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
 import {
 	View,
 	StyleSheet,
@@ -6,8 +7,11 @@ import {
 } from 'react-native';
 import Timer from '../timer/Timer';
 import MineCounter from '../minecounter/MineCounter';
-import Icon from '../icon/icon';
-import commonStyles from '../../shared/styles'
+import Icon from '../Icon';
+import commonStyles from '../../shared/styles';
+import faceWin from '../../assets/face_win.png';
+import faceLost from '../../assets/face_lost.png';
+import faceAlive from '../../assets/face_alive.png';
 
 
 export default class StatBoard extends PureComponent {
@@ -19,21 +23,21 @@ export default class StatBoard extends PureComponent {
 
 		switch (this.props.game.status) {
 			case 'won':
-				buttonAsset = 'face_win';
+				buttonAsset = faceWin;
 				break;
 			case 'lost':
-				buttonAsset = 'face_lost';
+				buttonAsset = faceLost;
 				break;
 			default:
-				buttonAsset = 'face_alive';
+				buttonAsset = faceAlive;
 		}
 
-		return <View style={[commonStyles.border, styles.statboard]} className="statboard game__border">
+		return <View style={[commonStyles.border, styles.statboard]}>
 			<Timer startedAt={this.props.game.startedAt} status={this.props.game.status} />
 			<View style={styles.buttons}>
 				<TouchableHighlight onPress={this.props.onGameButtonPressed}>
 					<View style={styles.iconButton}>
-						<Icon source={buttonAsset} />
+						<Icon source={buttonAsset} externalSource={true} width={40} height={40} />
 					</View>
 				</TouchableHighlight>
 				<TouchableHighlight onPress={this.props.onMenuButtonPressed}>
@@ -45,6 +49,17 @@ export default class StatBoard extends PureComponent {
 			<MineCounter minesRemaining={minesRemaining} />
 		</View>
 	}
+}
+
+StatBoard.propTypes = {
+	game: PropTypes.shape({
+		totalMines: PropTypes.number,
+		status: PropTypes.string,
+		startedAt: PropTypes.number
+	}),
+	flaggedMines: PropTypes.number,
+	onGameButtonPressed: PropTypes.func,
+	onMenuButtonPressed: PropTypes.func
 }
 
 const styles = StyleSheet.create({

@@ -1,15 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { formatGameTime } from '../../shared/time-utils';
 import GameText from '../../components/GameText';
 
 export default function RankRow (props) {
-    const { rank, score } = props;
+    const { rank, score, isMe } = props;
+    let playerStyles = [styles.playerName];
+    if (isMe) {
+        playerStyles.push(styles.me);
+    }
     return (<View style={styles.row}>
-        <GameText style={styles.rank}>{rank}</GameText>
-        <GameText style={styles.playerName} >{score.user.displayName}</GameText>
-        <GameText style={styles.score}>{formatGameTime(score.score, 2)}</GameText>
+        <GameText style={[styles.rank, isMe ? styles.me : null]}>{rank}</GameText>
+        <GameText style={[styles.playerName, isMe ? styles.me : null]} ellipsizeMode="tail" numberOfLines={1}>{score.user.displayName}</GameText>
+        <GameText style={[styles.score, isMe ? styles.me : null]} ellipsizeMode="tail" numberOfLines={1}>{formatGameTime(score.score, 2)}</GameText>
     </View>);
 }
 
@@ -21,6 +25,7 @@ RankRow.propTypes = {
             displayName: PropTypes.string
         })
     }),
+    isMe: PropTypes.bool
 }
 
 const styles = StyleSheet.create({
@@ -30,13 +35,16 @@ const styles = StyleSheet.create({
         padding: 10
     },
     rank: {
-        width: 40,
+        width: 70,
         fontSize: 10
     },
     playerName: {
         flex: 1,
         textAlign: 'left',
         fontSize: 10
+    },
+    me: {
+        color: 'green'
     },
     score: {
         width: 80,

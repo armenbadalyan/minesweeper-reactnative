@@ -12,7 +12,7 @@ import { BG_MAIN_COLOR } from '../../constants';
 import commonStyles from '../../shared/styles'
 
 const mapStateToProps = state => ({
-	auth: state.auth,
+	user: state.auth.user,
 	leaders: state.leaderboard.leaders,
 	selectedLevel: state.leaderboard.selectedLevel,
 	selectedPeriod: state.leaderboard.selectedPeriod
@@ -93,8 +93,13 @@ export class LeaderboardScreen extends Component {
 			selected={highlighted} />);
 	}
 
-	renderLeader({ item }) {
-		return <RankRow key={item.rank} rank={item.rank} score={item.score} />;
+	renderLeader = ({ item }) => {
+		const user = this.props.user;
+		let isMe = false;
+		if (user && user.uid === item.score.user.uid) {
+			isMe = true;
+		}
+		return <RankRow key={item.rank} rank={item.rank} score={item.score} isMe={isMe} />;
 	}
 
 
@@ -139,6 +144,9 @@ export class LeaderboardScreen extends Component {
 export default connect(mapStateToProps, mapDispatchToProps)(LeaderboardScreen);
 
 LeaderboardScreen.propTypes = {
+	user: PropTypes.shape({
+		uid: PropTypes.string
+	}),
 	leaders: PropTypes.arrayOf(PropTypes.shape({
 		user: PropTypes.object,
 		rank: PropTypes.number

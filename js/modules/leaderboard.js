@@ -14,6 +14,8 @@ export const RankingPeriod = {
     OVERALL: 'overall'
 }
 
+const TOP_RANK_COUNT = 100;
+
 const periodStart = {
     [RankingPeriod.DAILY]: () => {
         return moment().utc().startOf('day').valueOf()
@@ -48,10 +50,11 @@ export default (state = initialState, action) => {
                 ...state,
                 selectedPeriod: payload
             }
-        case UPDATE_LEADERS: 
+        case UPDATE_LEADERS:
             return {
                 ...state,
-                leaders: payload
+                leaders: payload.leaders,
+                playerRank: payload.playerRank
             }
         default:
             return state;
@@ -80,14 +83,16 @@ export function updatePeriod(period) {
 
 export function fetchLeaders(level, period) {
     return (dispatch, getState) => {
-        const user = getState().auth.user;
-        console.log(periodStart[period]());
+        const state = getState();
+        const user = state.auth.user;
+        const bestScore = state.score.bestScore;
+
         const getLeaders = firebase.firestore()
             .collection(`scores_${period}`)
             .where('difficulty', '==', level)
             .where('period', '==', periodStart[period]())
             .orderBy('score')
-            .limit(10)
+            .limit(TOP_RANK_COUNT)
             .get()
             .then((snapshots) => {
                 let leaders = [],
@@ -107,12 +112,35 @@ export function fetchLeaders(level, period) {
                 return [];
             });
 
+        let leaderboardRequests = [getLeaders];
 
-        return Promise.all([getLeaders]).then(([leaders]) => {
+        if (user && bestScore && bestScore[level]) {
+            const getPlayerRank = firebase.firestore()
+                .collection(`scores_${period}`)
+                .where('difficulty', '==', level)
+                .where('period', '==', periodStart[period]())
+                .where('score', '<', bestScore[level].score)
+                .orderBy('score')
+                .get()
+                .then((snapshots) => {                    
+                    return snapshots.size + 1;
+                })
+                .catch(err => {
+                    return null;
+                });
+
+            leaderboardRequests.push(getPlayerRank);
+        }
+
+
+        return Promise.all(leaderboardRequests).then(([leaders, playerRank]) => {
             console.log(leaders);
             dispatch({
                 type: UPDATE_LEADERS,
-                payload: leaders
+                payload: {
+                    leaders,
+                    playerRank
+                }
             });
             return leaders;
         });

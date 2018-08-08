@@ -35,13 +35,15 @@ const styles = StyleSheet.create({
         padding: 10
     },
     rank: {
-        width: 70,
+        minWidth: 35,
         fontSize: 10
     },
     playerName: {
         flex: 1,
         textAlign: 'left',
-        fontSize: 10
+        fontSize: 10,
+        paddingLeft: 10,
+        paddingRight: 10
     },
     me: {
         color: 'green'

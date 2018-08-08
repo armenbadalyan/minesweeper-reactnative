@@ -5,6 +5,7 @@ import ModalDropdown from 'react-native-modal-dropdown';
 import { connect } from 'react-redux';
 import { updateLevel, updatePeriod, fetchLeaders, RankingPeriod } from '../../modules/leaderboard';
 import RankRow from './RankRow';
+import RankSeparator from './RankSeparator';
 import { DifficultyLevel } from '../../modules/game';
 import Button from '../../components/Button';
 import GameText from '../../components/GameText';
@@ -13,7 +14,9 @@ import commonStyles from '../../shared/styles'
 
 const mapStateToProps = state => ({
 	user: state.auth.user,
+	highscores: state.score.bestScore,
 	leaders: state.leaderboard.leaders,
+	playerRank: state.leaderboard.playerRank,
 	selectedLevel: state.leaderboard.selectedLevel,
 	selectedPeriod: state.leaderboard.selectedPeriod
 });
@@ -85,6 +88,35 @@ export class LeaderboardScreen extends Component {
 		this.props.fetchLeaders(this.props.selectedLevel, value.id);
 	}
 
+	getRows() {
+		const leaderCount = this.props.leaders.length,
+			playerRank = this.props.playerRank,
+			highscore = this.props.highscores[this.props.selectedLevel];			
+
+		if (playerRank && highscore) {
+			const currentPlayerRank = highscore ? {
+				rank: playerRank,
+				score: {
+					score: highscore.score,
+					user: this.props.user
+				}
+			} : null;
+
+			if (playerRank <= leaderCount) {
+				return this.props.leaders;
+			}
+			else if (playerRank == leaderCount + 1) {
+				return [...this.props.leaders, currentPlayerRank];
+			}
+			else {
+				return [...this.props.leaders, { isSeparator: true }, currentPlayerRank];
+			}
+		}
+		else {
+			return this.props.leaders;
+		}		
+	}
+
 	renderOptionRow = (data, id, highlighted) => {
 		return (<Button title={data.name}
 			style={styles.filterButton}
@@ -94,12 +126,17 @@ export class LeaderboardScreen extends Component {
 	}
 
 	renderLeader = ({ item }) => {
-		const user = this.props.user;
-		let isMe = false;
-		if (user && user.uid === item.score.user.uid) {
-			isMe = true;
+		if (item.isSeparator) {
+			return <RankSeparator />;
 		}
-		return <RankRow key={item.rank} rank={item.rank} score={item.score} isMe={isMe} />;
+		else {
+			const user = this.props.user;
+			let isMe = false;
+			if (user && user.uid === item.score.user.uid) {
+				isMe = true;
+			}
+			return <RankRow key={item.rank} rank={item.rank} score={item.score} isMe={isMe} />;
+		}
 	}
 
 
@@ -134,7 +171,7 @@ export class LeaderboardScreen extends Component {
 
 			</View>
 			<View style={[commonStyles.border, styles.leaderboard]}>
-				<FlatList data={this.props.leaders} renderItem={this.renderLeader} />
+				<FlatList data={this.getRows()} renderItem={this.renderLeader} />
 			</View>
 
 		</View>);
@@ -147,10 +184,12 @@ LeaderboardScreen.propTypes = {
 	user: PropTypes.shape({
 		uid: PropTypes.string
 	}),
+	highscores: PropTypes.object,
 	leaders: PropTypes.arrayOf(PropTypes.shape({
 		user: PropTypes.object,
 		rank: PropTypes.number
 	})),
+	playerRank: PropTypes.number,
 	selectedPeriod: PropTypes.string,
 	selectedLevel: PropTypes.string,
 	fetchLeaders: PropTypes.func,

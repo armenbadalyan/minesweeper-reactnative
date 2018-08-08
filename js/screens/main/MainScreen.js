@@ -2,11 +2,9 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { View, Image, StyleSheet } from 'react-native';
-import { restoreAuthentication, signOut } from '../../modules/auth';
-import { restoreScore } from '../../modules/score';
+import { signOut } from '../../modules/auth';
 import { DifficultyLevel } from '../../modules/game';
 import Button from '../../components/Button';
-import GameText from '../../components/GameText';
 import HighScores from '../../components/HighScores';
 import { BG_MAIN_COLOR } from '../../constants';
 import logo from '../../assets/logo.png';
@@ -74,9 +72,6 @@ export class MainScreen extends Component {
             <View style={[styles.row, styles['row-flex-1']]}>
                 <Image style={styles.logo} source={logo} resizeMode="contain" fadeDuration={0} />
             </View>
-            <View style={[styles.row, styles.greeting]}>
-                {this.props.auth.user && <GameText numberOfLines={1} ellipsizeMode="tail" style={styles.greetingText}>Hello, {this.props.auth.user.displayName}</GameText>}
-            </View>
             <View style={styles.row}>
                 <Button title="BEGINNER" onPress={this.startBeginnerGame} style={styles.button} />
                 <Button title="INTERMEDIATE" onPress={this.startIntermediateGame} style={styles.button} />
@@ -93,7 +88,12 @@ export class MainScreen extends Component {
 export default connect(mapStateToProps, mapDispatchToProps)(MainScreen);
 
 MainScreen.propTypes = {
-    navigation: PropTypes.object
+    navigation: PropTypes.object,
+    bestScore: PropTypes.object,
+    auth: PropTypes.shape({
+        user: PropTypes.object
+    }),
+    signOut: PropTypes.func
 }
 
 const styles = StyleSheet.create({

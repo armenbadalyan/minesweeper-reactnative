@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { View, StyleSheet } from 'react-native';
 import { connect } from 'react-redux';
 import { initGame, cellClick, cellAltClick, convertToMines, GameStatus } from '../../modules/game';
@@ -151,6 +152,33 @@ export class GameScreen extends Component {
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(GameScreen);
+
+GameScreen.propTypes = {
+    game: PropTypes.shape({
+        game: PropTypes.object,
+        field: PropTypes.object
+    }),
+    lastScore: PropTypes.shape({
+        score: PropTypes.number
+    }),
+    status: PropTypes.string,
+    user: PropTypes.shape({
+        displayName: PropTypes.string
+    }),
+    preferences: PropTypes.shape({
+        userModalAknowledged: PropTypes.bool
+    }),
+    navigation: PropTypes.shape({
+        getParam: PropTypes.func,
+        goBack: PropTypes.func
+    }),
+    cellClick: PropTypes.func,
+    cellAltClick: PropTypes.func,
+    convertToMines: PropTypes.func,
+    initGame: PropTypes.func,
+    updateProfile: PropTypes.func,
+    aknowledgeUserModal: PropTypes.func
+}
 
 const styles = StyleSheet.create({
     game: {

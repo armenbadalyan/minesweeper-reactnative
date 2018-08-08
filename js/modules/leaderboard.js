@@ -7,6 +7,7 @@ import { DifficultyLevel } from './game';
 export const UPDATE_LEVEL = 'leaderboard/UPDATE_LEVEL';
 export const UPDATE_PERIOD = 'leaderboard/UPDATE_PERIOD';
 export const UPDATE_LEADERS = 'leaderboard/UPDATE_LEADERS';
+export const UPDATE_PLAYER_RANK = 'leaderboard/UPDATE_PLAYER_RANK';
 
 export const RankingPeriod = {
     DAILY: 'daily',
@@ -33,7 +34,7 @@ const initialState = {
     selectedLevel: DifficultyLevel.BEGINNER,
     selectedPeriod: RankingPeriod.OVERALL,
     leaders: [],
-    playerRank: null
+    playerRank: 0
 };
 
 //reducer
@@ -53,8 +54,12 @@ export default (state = initialState, action) => {
         case UPDATE_LEADERS:
             return {
                 ...state,
-                leaders: payload.leaders,
-                playerRank: payload.playerRank
+                leaders: payload
+            }
+        case UPDATE_PLAYER_RANK:
+            return {
+                ...state,
+                playerRank: payload
             }
         default:
             return state;
@@ -83,11 +88,12 @@ export function updatePeriod(period) {
 
 export function fetchLeaders(level, period) {
     return (dispatch, getState) => {
-        const state = getState();
-        const user = state.auth.user;
-        const bestScore = state.score.bestScore;
+        const state = getState(),
+            user = state.auth.user,
+            bestScore = state.score.bestScore;
 
-        const getLeaders = firebase.firestore()
+
+        return firebase.firestore()
             .collection(`scores_${period}`)
             .where('difficulty', '==', level)
             .where('period', '==', periodStart[period]())
@@ -96,13 +102,44 @@ export function fetchLeaders(level, period) {
             .get()
             .then((snapshots) => {
                 let leaders = [],
-                    idx = 0;
+                    idx = 0,
+                    currentUserLeaderRank = getCurrentUserLeaderRank(user, leaders);
 
                 snapshots.forEach(snapshot => {
+                    const userData = snapshot.data();
+
                     leaders.push({
-                        score: snapshot.data(),
+                        score: userData,
                         rank: ++idx
                     });
+                });
+
+                if (currentUserLeaderRank) {
+                    dispatch({
+                        type: UPDATE_PLAYER_RANK,
+                        payload: currentUserLeaderRank
+                    });
+                }
+                else if (bestScore && bestScore[level]) {
+                    fetchCurrentUserGlobalRank(user, bestScore[level].score, level, period).then(userRank => {
+                        dispatch({
+                            type: UPDATE_PLAYER_RANK,
+                            payload: userRank
+                        })
+                    }).catch(err => {
+                        console.log(err);
+                    });
+                }
+                else {
+                    dispatch({
+                        type: UPDATE_PLAYER_RANK,
+                        payload: 0
+                    });
+                }
+
+                dispatch({
+                    type: UPDATE_LEADERS,
+                    payload: leaders
                 });
 
                 return leaders;
@@ -111,39 +148,23 @@ export function fetchLeaders(level, period) {
                 console.log(err);
                 return [];
             });
-
-        let leaderboardRequests = [getLeaders];
-
-        if (user && bestScore && bestScore[level]) {
-            const getPlayerRank = firebase.firestore()
-                .collection(`scores_${period}`)
-                .where('difficulty', '==', level)
-                .where('period', '==', periodStart[period]())
-                .where('score', '<', bestScore[level].score)
-                .orderBy('score')
-                .get()
-                .then((snapshots) => {                    
-                    return snapshots.size + 1;
-                })
-                .catch(err => {
-                    return null;
-                });
-
-            leaderboardRequests.push(getPlayerRank);
-        }
-
-
-        return Promise.all(leaderboardRequests).then(([leaders, playerRank]) => {
-            console.log(leaders);
-            dispatch({
-                type: UPDATE_LEADERS,
-                payload: {
-                    leaders,
-                    playerRank
-                }
-            });
-            return leaders;
-        });
     }
+}
+
+function fetchCurrentUserGlobalRank(user, userScore, level, period) {
+    return firebase.firestore()
+        .collection(`scores_${period}`)
+        .where('difficulty', '==', level)
+        .where('period', '==', periodStart[period]())
+        .where('score', '<', userScore)
+        .orderBy('score')
+        .get()
+        .then((snapshots) => {
+            return snapshots.size + 1;
+        });
+}
+
+function getCurrentUserLeaderRank(currentUser, leaders) {
+    return leaders.findIndex(leader => leader.score.user.uid === currentUser.uid) + 1;
 }
 

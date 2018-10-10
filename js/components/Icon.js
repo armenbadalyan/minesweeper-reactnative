@@ -29,7 +29,7 @@ export default class Icon extends PureComponent {
 }
 
 Icon.propTypes = {
-	source: PropTypes.string,
+	source: PropTypes.oneOf(PropTypes.string, PropTypes.number),
 	width: PropTypes.number,
 	height: PropTypes.number,
 	style: PropTypes.number,

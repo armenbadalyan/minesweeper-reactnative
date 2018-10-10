@@ -76,5 +76,5 @@ Button.propTypes = {
     style: PropTypes.number,
     titleStyle: PropTypes.number,
     touchable: PropTypes.bool,
-    selected: PropTypes.selected
+    selected: PropTypes.bool
 }

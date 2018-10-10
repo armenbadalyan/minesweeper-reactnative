@@ -26,7 +26,7 @@ export default class UserIDModal extends Component {
     }
 
     onSubmit = () => {
-        this.props.onSubmit(this.userName);
+        this.props.onSubmit(this.userName || this.props.defaultValue);
     }
 
     onRequestClose = () => {

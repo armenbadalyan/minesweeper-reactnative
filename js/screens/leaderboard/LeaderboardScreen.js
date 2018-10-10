@@ -117,6 +117,10 @@ export class LeaderboardScreen extends Component {
 		}		
 	}
 
+	keyExtractor(item) {
+		return item.isSeparator ? 'separator': item.score.user.uid;
+	}
+
 	renderOptionRow = (data, id, highlighted) => {
 		return (<Button title={data.name}
 			style={styles.filterButton}
@@ -171,7 +175,7 @@ export class LeaderboardScreen extends Component {
 
 			</View>
 			<View style={[commonStyles.border, styles.leaderboard]}>
-				<FlatList data={this.getRows()} renderItem={this.renderLeader} />
+				<FlatList data={this.getRows()} keyExtractor={this.keyExtractor} renderItem={this.renderLeader} />
 			</View>
 
 		</View>);
@@ -225,8 +229,7 @@ const styles = StyleSheet.create({
 		alignItems: 'center'
 	},
 	filterButton: {
-		flex: 1,
-		fontSize: 10
+		flex: 1
 	},
 	filterButtonTitle: {
 		fontSize: 10

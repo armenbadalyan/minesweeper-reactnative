@@ -29,8 +29,12 @@ export default function LCD(props) {
         value = props.value;
 
     if (value > MAX_LCD_VALUE) {
-        d1 = d2 = d3 = 'd_9';
+        d1 = d2 = d3 = 'd9';
     }
+    else if (value < 0) {
+        console.log('LCD value is negative')
+        d1 = d2 = d3 = 'd0';
+    } 
     else {
         currentDigit = Math.floor(value / 100);
         d1 = `d${currentDigit}`;

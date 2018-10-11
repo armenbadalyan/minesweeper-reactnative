@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import LCD from '../lcd/LCD';
+import LCD from './LCD';
 
 export default class Timer extends PureComponent {
 

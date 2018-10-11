@@ -1,9 +1,5 @@
 import React, { PureComponent } from 'react';
-import {
-  Text,
-  View
-} from 'react-native';
-import LCD from '../lcd/LCD';
+import LCD from './LCD';
 
 class MineCounter extends PureComponent {
 

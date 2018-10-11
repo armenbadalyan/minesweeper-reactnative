@@ -1,17 +1,15 @@
 import React, { PureComponent } from 'react';
 import { WebGLView } from "react-native-webgl";
-import { Cell } from '../cell';
-import { GameStatus } from '../../modules/game';
-import TextManager from '../../shared/texture-manager';
+import { GameStatus } from '../modules/game';
+import TextManager from '../shared/texture-manager';
 import {
     View,
     AppState,
     TouchableWithoutFeedback,
     StyleSheet
 } from 'react-native';
-import commonStyles from '../../shared/styles.js';
-import TextureManager from '../../shared/texture-manager';
-import { BG_MAIN_COLOR } from '../../constants';
+import commonStyles from '../shared/styles.js';
+import { BG_MAIN_COLOR } from '../constants';
 
 const FIELD_BORDER_WIDTH = 6;
 const textures = [{

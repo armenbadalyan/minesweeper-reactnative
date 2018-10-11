@@ -5,13 +5,13 @@ import {
 	StyleSheet,
 	TouchableHighlight
 } from 'react-native';
-import Timer from '../timer/Timer';
-import MineCounter from '../minecounter/MineCounter';
-import Icon from '../Icon';
-import commonStyles from '../../shared/styles';
-import faceWin from '../../assets/face_win.png';
-import faceLost from '../../assets/face_lost.png';
-import faceAlive from '../../assets/face_alive.png';
+import Timer from './Timer';
+import MineCounter from './MineCounter';
+import Icon from './Icon';
+import commonStyles from '../shared/styles';
+import faceWin from '../assets/face_win.png';
+import faceLost from '../assets/face_lost.png';
+import faceAlive from '../assets/face_alive.png';
 
 
 export default class StatBoard extends PureComponent {

@@ -1,7 +1,8 @@
 import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
 import { WebGLView } from "react-native-webgl";
 import { GameStatus } from '../modules/game';
-import TextManager from '../shared/texture-manager';
+import TextureManager from '../shared/texture-manager';
 import {
     View,
     AppState,
@@ -183,7 +184,7 @@ export default class Minefield extends PureComponent {
     onContextCreate = (gl) => {
         this.gl = gl;
 
-        TextManager.loadTextures(gl, textures).then(() => {
+        TextureManager.loadTextures(gl, textures).then(() => {
             this.texturesLoaded = true;
             this.createShaders();
             this.renderField(this.props.field, this.props.status);
@@ -206,7 +207,7 @@ export default class Minefield extends PureComponent {
     }
 
     loadTextures() {
-        TextManager.loadTextures(this.gl, textures);
+        TextureManager.loadTextures(this.gl, textures);
     }
 
     initField() {
@@ -443,6 +444,17 @@ export default class Minefield extends PureComponent {
             { !this.state.gameFieldReady && <View style={styles.fieldOverlay} />}
         </View>;
     }
+}
+
+Minefield.propTypes = {
+    field: PropTypes.shape({
+        rows: PropTypes.number,
+        cols: PropTypes.number,
+        cells: PropTypes.object
+    }),
+    status: PropTypes.string,
+    onCellClick: PropTypes.func,
+    onCellAltClick: PropTypes.func
 }
 
 const styles = StyleSheet.create({

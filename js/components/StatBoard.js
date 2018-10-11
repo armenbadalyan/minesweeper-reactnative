@@ -33,7 +33,7 @@ export default class StatBoard extends PureComponent {
 		}
 
 		return <View style={[commonStyles.border, styles.statboard]}>
-			<Timer startedAt={this.props.game.startedAt} status={this.props.game.status} />
+			<Timer startedAt={this.props.game.startedAt} finishedAt={this.props.game.finishedAt} status={this.props.game.status} />
 			<View style={styles.buttons}>
 				<TouchableHighlight onPress={this.props.onGameButtonPressed}>
 					<View style={styles.iconButton}>
@@ -55,7 +55,8 @@ StatBoard.propTypes = {
 	game: PropTypes.shape({
 		totalMines: PropTypes.number,
 		status: PropTypes.string,
-		startedAt: PropTypes.number
+		startedAt: PropTypes.number,
+		finishedAt: PropTypes.finishedAt
 	}),
 	flaggedMines: PropTypes.number,
 	onGameButtonPressed: PropTypes.func,

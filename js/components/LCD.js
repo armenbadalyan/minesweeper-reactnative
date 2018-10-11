@@ -1,4 +1,5 @@
-import React, { PureComponent } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import {
     View,
     StyleSheet
@@ -20,36 +21,37 @@ const digits = {
     d9: 'd_9'
 }
 
-export default class LCD extends PureComponent {
-    render() {
+export default function LCD(props) {
+    let d1,
+        d2,
+        d3,
+        currentDigit,
+        value = props.value;
 
-        let d1,
-            d2,
-            d3,
-            currentDigit,
-            value = this.props.value;
-
-        if (value > MAX_LCD_VALUE) {
-            d1 = d2 = d3 = 'd_9';
-        }
-        else {
-            currentDigit = Math.floor(value / 100);
-            d1 = `d${currentDigit}`;
-
-            value -= currentDigit * 100;
-            currentDigit = Math.floor(value / 10);
-            d2 = `d${currentDigit}`;
-
-            value -= currentDigit * 10;
-            d3 = `d${value}`;
-        }
-
-        return <View style={styles.lcd}>
-            <Icon style={styles.digit} fadeDuration={0} source={digits[d1]} />
-            <Icon style={styles.digit} fadeDuration={0} source={digits[d2]} />
-            <Icon style={styles.digit} fadeDuration={0} source={digits[d3]} />
-        </View>
+    if (value > MAX_LCD_VALUE) {
+        d1 = d2 = d3 = 'd_9';
     }
+    else {
+        currentDigit = Math.floor(value / 100);
+        d1 = `d${currentDigit}`;
+
+        value -= currentDigit * 100;
+        currentDigit = Math.floor(value / 10);
+        d2 = `d${currentDigit}`;
+
+        value -= currentDigit * 10;
+        d3 = `d${value}`;
+    }
+
+    return <View style={styles.lcd}>
+        <Icon style={styles.digit} fadeDuration={0} source={digits[d1]} />
+        <Icon style={styles.digit} fadeDuration={0} source={digits[d2]} />
+        <Icon style={styles.digit} fadeDuration={0} source={digits[d3]} />
+    </View>
+}
+
+LCD.propTypes = {
+    value: PropTypes.number
 }
 
 const styles = StyleSheet.create({

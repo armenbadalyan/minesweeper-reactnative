@@ -1,11 +1,11 @@
-import React, { PureComponent } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import LCD from './LCD';
 
-class MineCounter extends PureComponent {
-
-    render() {
-        return <LCD style={{}} value={this.props.minesRemaining} />;
-    }
+export default function MineCounter(props) {
+    return <LCD value={props.minesRemaining} />;
 }
 
-export default MineCounter;
+MineCounter.propTypes = {
+    minesRemaining: PropTypes.number
+}

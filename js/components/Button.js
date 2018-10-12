@@ -73,8 +73,8 @@ Button.defaultProps = {
 Button.propTypes = {
     title: PropTypes.string,
     onPress: PropTypes.func,
-    style: PropTypes.number,
-    titleStyle: PropTypes.number,
+    style: PropTypes.any,
+    titleStyle: PropTypes.any,
     touchable: PropTypes.bool,
     selected: PropTypes.bool
 }

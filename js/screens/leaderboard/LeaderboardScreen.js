@@ -118,7 +118,7 @@ export class LeaderboardScreen extends Component {
 	}
 
 	keyExtractor(item) {
-		return item.isSeparator ? 'separator': item.score.user.uid;
+		return item.isSeparator ? 'separator': item.score.user.uid + item.rank;
 	}
 
 	renderOptionRow = (data, id, highlighted) => {

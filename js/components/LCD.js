@@ -32,7 +32,6 @@ export default function LCD(props) {
         d1 = d2 = d3 = 'd9';
     }
     else if (value < 0) {
-        console.log('LCD value is negative')
         d1 = d2 = d3 = 'd0';
     } 
     else {

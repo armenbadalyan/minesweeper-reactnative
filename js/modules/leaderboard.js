@@ -103,7 +103,7 @@ export function fetchLeaders(level, period) {
             .then((snapshots) => {
                 let leaders = [],
                     idx = 0,
-                    currentUserLeaderRank = getCurrentUserLeaderRank(user, leaders);
+                    currentUserLeaderRank;
 
                 snapshots.forEach(snapshot => {
                     const userData = snapshot.data();
@@ -113,6 +113,8 @@ export function fetchLeaders(level, period) {
                         rank: ++idx
                     });
                 });
+
+                currentUserLeaderRank = getCurrentUserLeaderRank(user, leaders);
 
                 if (currentUserLeaderRank) {
                     dispatch({

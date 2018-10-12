@@ -15,7 +15,7 @@ export const RankingPeriod = {
     OVERALL: 'overall'
 }
 
-const TOP_RANK_COUNT = 100;
+const TOP_RANK_COUNT = 20;
 
 const periodStart = {
     [RankingPeriod.DAILY]: () => {
@@ -54,7 +54,8 @@ export default (state = initialState, action) => {
         case UPDATE_LEADERS:
             return {
                 ...state,
-                leaders: payload
+                leaders: payload.leaders,
+                playerRank: payload.playerRank
             }
         case UPDATE_PLAYER_RANK:
             return {
@@ -103,7 +104,7 @@ export function fetchLeaders(level, period) {
             .then((snapshots) => {
                 let leaders = [],
                     idx = 0,
-                    currentUserLeaderRank;
+                    currentUserLeaderRank = 0;
 
                 snapshots.forEach(snapshot => {
                     const userData = snapshot.data();
@@ -114,34 +115,27 @@ export function fetchLeaders(level, period) {
                     });
                 });
 
-                currentUserLeaderRank = getCurrentUserLeaderRank(user, leaders);
+                if (leaders.length) {
+                    currentUserLeaderRank = getCurrentUserLeaderRank(user, leaders);
 
-                if (currentUserLeaderRank) {
-                    dispatch({
-                        type: UPDATE_PLAYER_RANK,
-                        payload: currentUserLeaderRank
-                    });
-                }
-                else if (bestScore && bestScore[level]) {
-                    fetchCurrentUserGlobalRank(user, bestScore[level].score, level, period).then(userRank => {
-                        dispatch({
-                            type: UPDATE_PLAYER_RANK,
-                            payload: userRank
-                        })
-                    }).catch(err => {
-                        console.log(err);
-                    });
-                }
-                else {
-                    dispatch({
-                        type: UPDATE_PLAYER_RANK,
-                        payload: 0
-                    });
-                }
+                    if (!currentUserLeaderRank && bestScore && bestScore[level]) {
+                        fetchCurrentUserGlobalRank(user, bestScore[level].score, level, period).then(userRank => {
+                            dispatch({
+                                type: UPDATE_PLAYER_RANK,
+                                payload: userRank
+                            })
+                        }).catch(err => {
+                            console.log(err);
+                        });
+                    }
+                }                
 
                 dispatch({
                     type: UPDATE_LEADERS,
-                    payload: leaders
+                    payload: {
+                        leaders,
+                        playerRank: currentUserLeaderRank
+                    }
                 });
 
                 return leaders;

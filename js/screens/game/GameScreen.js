@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { View, StyleSheet } from 'react-native';
+import { View, Slider, StyleSheet } from 'react-native';
 import { connect } from 'react-redux';
 import { initGame, cellClick, cellAltClick, convertToMines, GameStatus } from '../../modules/game';
 import { updateProfile } from '../../modules/auth';
@@ -43,6 +43,8 @@ const mapDispatchToProps = dispatch => ({
 });
 
 export class GameScreen extends Component {
+
+    state={zoomLevel: 1}
 
     constructor(props) {
         super(props);
@@ -133,9 +135,9 @@ export class GameScreen extends Component {
                     flaggedMines={this.countFlaggedMines(this.props.game.field)}
                     onGameButtonPressed={this.onGameButtonPressed}
                     onMenuButtonPressed={this.onMenuButtonPressed} />
-                { /*<div className="game__separator" />*/}
-                <Minefield field={this.props.game.field} status={this.props.game.game.status} onCellClick={this.handleCellClick} onCellAltClick={this.handleCellAltClick} />
-                { /*<Button title="Convert to mines" onPress={this.handleConvertToMines} /> */}
+                
+                <Minefield zoomLevel={this.state.zoomLevel} maxZoomLevel={2.5} field={this.props.game.field} status={this.props.game.game.status} onCellClick={this.handleCellClick} onCellAltClick={this.handleCellAltClick} />
+                <Slider minimumValue={1} maximumValue={2.5} step={0.25} value={this.state.zoomLevel} onValueChange={(newValue) => { this.setState({zoomLevel: newValue}) } } />
                 {this.gameScoreReady() && <View style={styles.winSection}>
                     <GameText style={styles.winMessage}>Completed in {formatGameTime(this.props.lastScore.score, 2)}s</GameText>
                     {this.isHighScore() && <GameText style={styles.highscoreMessage}>New high score!</GameText>}

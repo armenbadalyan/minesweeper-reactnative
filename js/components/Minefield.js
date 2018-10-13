@@ -5,6 +5,7 @@ import { GameStatus } from '../modules/game';
 import TextureManager from '../shared/texture-manager';
 import {
     View,
+    ScrollView,
     AppState,
     TouchableWithoutFeedback,
     StyleSheet
@@ -79,8 +80,14 @@ const assets = {
 const assetsPerRow = 4;
 
 export default class Minefield extends PureComponent {
+    cellSize = 0
+    cellScaledSize = 0;
+    fieldWidth = 0;
+    fieldHeight = 0;
+    unscaledFieldWidth = 0;
+    unscaledFieldHeight = 0;
+    cellDimensions = null;
 
-    cellLayouts = {};
     gl = null;
     texturesLoaded = false;
     program;
@@ -91,10 +98,8 @@ export default class Minefield extends PureComponent {
         this.state = {
             appState: 'active',
             gameFieldReady: false,
-            cellWidth: 0,
-            cellHeight: 0,
-            fieldWidth: 0,
-            fieldHeight: 0
+            viewWidth: 0,
+            viewHeight: 0
         }
     }
 
@@ -105,49 +110,13 @@ export default class Minefield extends PureComponent {
     componentWillUnmount() {
         this.unloadTextures();
         AppState.removeEventListener('change', this.onAppStateChanged);
-    }   
-
-    UNSAFE_componentWillReceiveProps(nextProps) {
-        if (nextProps.field.rows !== this.props.field.rows || nextProps.field.cols !== this.props.field.cols) {
-            this.calculateCellLayouts(nextProps.field, this.state.cellWidth, this.state.cellHeight);
-        }
-
-        this.renderField(nextProps.field, nextProps.status);
     }
 
     handleLayoutChange = (event) => {
-        this.calculateCellDimensions(event.nativeEvent.layout.width, event.nativeEvent.layout.height, this.props.field.rows, this.props.field.cols);
-    }
-
-    calculateCellDimensions(fieldWidth, fieldHeight, rows, cols) {
-        let cellSize = (fieldWidth - FIELD_BORDER_WIDTH * 2) / cols;
-
-        this.calculateCellLayouts(this.props.field, cellSize, cellSize);
-
         this.setState({
-            cellWidth: cellSize,
-            cellHeight: cellSize,
-            fieldWidth: cellSize * cols,
-            fieldHeight: cellSize * rows
-        });
-    }
-
-    calculateCellLayouts = (field, cellWidth, cellHeight) => {
-        const cells = field.cells;
-        const cellKeys = Object.keys(cells)
-        this.cellLayouts = {};
-        cellKeys.forEach(key => {
-            this.cellLayouts[key] = StyleSheet.create(
-                {
-                    layout: {
-                        width: cellWidth,
-                        height: cellHeight,
-                        left: cells[key].col * cellWidth,
-                        top: cells[key].row * cellHeight
-                    }
-                }
-            );
-        });
+            viewWidth: event.nativeEvent.layout.width,
+            viewHeight: event.nativeEvent.layout.height
+        });     
     }
 
     onFieldPress = (event) => {
@@ -170,9 +139,10 @@ export default class Minefield extends PureComponent {
     getCellUnderCoord = (x, y) => {
         let cellX, cellY;
         const field = this.props.field;
+
         if (field) {
-            cellX = Math.floor(x / this.state.cellWidth);
-            cellY = Math.floor(y / this.state.cellHeight);
+            cellX = Math.floor(x / this.cellScaledSize);
+            cellY = Math.floor(y / this.cellScaledSize);
 
             return field.cells[cellY + ':' + cellX] || null;
         }
@@ -185,13 +155,14 @@ export default class Minefield extends PureComponent {
         this.gl = gl;
 
         TextureManager.loadTextures(gl, textures).then(() => {
+            console.log('TextureManager.loadTextures');
             this.texturesLoaded = true;
             this.createShaders();
             this.renderField(this.props.field, this.props.status);
             setTimeout(() => {
-                this.setState({gameFieldReady: true});
+                this.setState({ gameFieldReady: true });
             }, 20);
-            
+
         }).catch(err => {
             console.log(err);
         });
@@ -202,12 +173,8 @@ export default class Minefield extends PureComponent {
         if (nextAppState !== 'active') {
             this.unloadTextures();
         }
-        
-        this.setState({appState: nextAppState});
-    }
 
-    loadTextures() {
-        TextureManager.loadTextures(this.gl, textures);
+        this.setState({ appState: nextAppState });
     }
 
     initField() {
@@ -343,10 +310,10 @@ export default class Minefield extends PureComponent {
 
     renderCell(cell, vertices, colors, textureCoords) {
 
-        const x = this.toGLX(cell.col * this.state.cellWidth);
-        const y = this.toGLY(cell.row * this.state.cellHeight);
-        const cw = this.scaleToGLWidth(this.state.cellWidth);
-        const ch = this.scaleToGLHeight(this.state.cellHeight);
+        const x = this.toGLX(cell.col * this.cellScaledSize);
+        const y = this.toGLY(cell.row * this.cellScaledSize);
+        const cw = this.scaleToGLWidth(this.cellScaledSize);
+        const ch = this.scaleToGLHeight(this.cellScaledSize);
 
         let asset;
 
@@ -362,7 +329,7 @@ export default class Minefield extends PureComponent {
                 asset = assets['flag'];
             }
             else {
-                asset  = assets['closed'];
+                asset = assets['closed'];
             }
         }
         else {
@@ -395,6 +362,7 @@ export default class Minefield extends PureComponent {
     }
 
     unloadTextures = () => {
+        console.log('unloadTextures');
         TextureManager.unloadTextures(this.gl, textures);
         this.texturesLoaded = false;
     }
@@ -408,41 +376,77 @@ export default class Minefield extends PureComponent {
     }
 
     toGLX(x) {
-        return 2 * x / this.state.fieldWidth - 1;
+        return 2 * x / (this.unscaledFieldWidth * this.props.maxZoomLevel) - 1;
     }
 
     toGLY(y) {
-        return 1 - 2 * y / this.state.fieldHeight;
+        return 1 - 2 * y / (this.unscaledFieldHeight * this.props.maxZoomLevel);
     }
 
     scaleToGLWidth(width) {
-        return (2 * width) / this.state.fieldWidth;
+        return (2 * width) / (this.unscaledFieldWidth * this.props.maxZoomLevel );
     }
 
     scaleToGLHeight(height) {
-        return (2 * height) / this.state.fieldHeight;
+        return (2 * height) / (this.unscaledFieldHeight * this.props.maxZoomLevel);
     }
 
     render() {
+        console.log('render', this.state.viewWidth, this.state.viewHeight);
+        if (this.state.viewWidth && this.state.viewHeight) {
+            const rows = this.props.field.rows,
+                cols = this.props.field.cols;
 
-        const fieldStyles = StyleSheet.create({
-            dimensions: {
-                width: this.state.fieldWidth,
-                height: this.state.fieldHeight
-            }
-        });
+            this.cellSize = (this.state.viewWidth - FIELD_BORDER_WIDTH * 2) / cols;
+            this.cellScaledSize = this.cellSize * this.props.zoomLevel;
+            this.fieldWidth = this.cellScaledSize * cols;
+            this.fieldHeight = this.cellScaledSize * rows;
+            this.unscaledFieldWidth = this.cellSize * cols;
+            this.unscaledFieldHeight = this.cellSize * rows;
 
-        return <View style={commonStyles.border} onLayout={this.handleLayoutChange} >
-            <TouchableWithoutFeedback onPress={this.onFieldPress} onLongPress={this.onFieldLongPress}>
-                <View style={fieldStyles.dimensions} >
-                    <View>
-                        { this.state.appState === 'active' ? <WebGLView style={fieldStyles.dimensions} onContextCreate={this.onContextCreate} /> : null }
-                    </View>                    
-                    
-                </View>
-            </TouchableWithoutFeedback>
-            { !this.state.gameFieldReady && <View style={styles.fieldOverlay} />}
-        </View>;
+            console.log(this.cellSize, this.cellScaledSize, this.fieldWidth, this.fieldHeight, this.unscaledFieldWidth, this.unscaledFieldHeight);
+
+            const fieldStyles = StyleSheet.create({
+                scrollVDimensions: {
+                    width: this.unscaledFieldWidth,
+                    height: this.unscaledFieldHeight
+                },
+                scrollHDimensions: {
+                    width: this.fieldWidth,
+                    height: this.unscaledFieldHeight
+                },
+                fieldContainer: {
+                    width: this.fieldWidth,
+                    height: this.fieldHeight
+                },
+                fieldDimensions: {
+                    width: this.unscaledFieldWidth * this.props.maxZoomLevel,
+                    height: this.unscaledFieldHeight * this.props.maxZoomLevel
+                }
+            });
+
+            if (this.state.gameFieldReady) {
+                this.renderField(this.props.field, this.props.status);
+            }           
+
+            return <View style={commonStyles.border} onLayout={this.handleLayoutChange} >
+
+                <ScrollView style={fieldStyles.scrollVDimensions} >
+                    <ScrollView style={fieldStyles.fieldHDimensions} horizontal>
+                        <TouchableWithoutFeedback onPress={this.onFieldPress} onLongPress={this.onFieldLongPress}>
+                            <View style={fieldStyles.fieldContainer}>
+                                {this.state.appState === 'active' ? <WebGLView style={fieldStyles.fieldDimensions} onContextCreate={this.onContextCreate} /> : null}
+                            </View>
+                        </TouchableWithoutFeedback>
+                    </ScrollView>
+                </ScrollView>
+
+                {!this.state.gameFieldReady && <View style={styles.fieldOverlay} />}
+            </View>;
+        }
+        else {
+            return <View style={commonStyles.border} onLayout={this.handleLayoutChange} />;
+        }
     }
 }
 
@@ -452,11 +456,13 @@ Minefield.propTypes = {
         cols: PropTypes.number,
         cells: PropTypes.object
     }),
+    zoomLevel: PropTypes.number,
+    maxZoomLevel: PropTypes.number,
     status: PropTypes.string,
     onCellClick: PropTypes.func,
     onCellAltClick: PropTypes.func
 }
 
 const styles = StyleSheet.create({
-    fieldOverlay: {top: 0, left:0, right: 0, bottom: 0, backgroundColor: BG_MAIN_COLOR, position: 'absolute'}
+    fieldOverlay: { top: 0, left: 0, right: 0, bottom: 0, backgroundColor: BG_MAIN_COLOR, position: 'absolute' }
 });

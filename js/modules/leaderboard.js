@@ -15,7 +15,7 @@ export const RankingPeriod = {
     OVERALL: 'overall'
 }
 
-const TOP_RANK_COUNT = 20;
+const TOP_RANK_COUNT = 100;
 
 const periodStart = {
     [RankingPeriod.DAILY]: () => {

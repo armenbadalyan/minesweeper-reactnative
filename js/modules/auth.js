@@ -40,10 +40,8 @@ export function restoreAuthentication() {
     return (dispatch) => {
         return new Promise((resolve, reject) => {
             const unsubscribe = firebase.auth().onAuthStateChanged(function (user) {
-                console.log(user);
                 unsubscribe();
                 if (user) {
-                    console.log('Current user ', user);
                     dispatch({
                         type: SIGN_IN,
                         payload: user.toJSON()
@@ -65,7 +63,6 @@ export function signInAnonymously() {
             .signInAnonymouslyAndRetrieveData()
             .then(credential => {
                 if (credential) {
-                    console.log('default app user ->', credential.user.toJSON());
                     dispatch({
                         type: SIGN_IN,
                         payload: credential.user.toJSON()

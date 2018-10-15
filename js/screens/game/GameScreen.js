@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { View, Slider, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { connect } from 'react-redux';
+import Slider from "react-native-slider";
 import { initGame, cellClick, cellAltClick, convertToMines, GameStatus } from '../../modules/game';
 import { updateProfile } from '../../modules/auth';
 import { aknowledgeUserModal } from '../../modules/preferences';
@@ -11,6 +12,7 @@ import GameText from '../../components/GameText';
 import UserIDModal from '../../components/UserIDModal';
 import { formatGameTime } from '../../shared/time-utils';
 import { connectivityAvailable } from '../../shared/connection';
+import { BG_MAIN_COLOR, BG_ALT_COLOR, BORDER1_COLOR, BORDER2_COLOR } from '../../constants';
 
 const mapStateToProps = state => ({
     user: state.auth.user,
@@ -44,7 +46,7 @@ const mapDispatchToProps = dispatch => ({
 
 export class GameScreen extends Component {
 
-    state={zoomLevel: 1}
+    state = { zoomLevel: 1 }
 
     constructor(props) {
         super(props);
@@ -135,9 +137,15 @@ export class GameScreen extends Component {
                     flaggedMines={this.countFlaggedMines(this.props.game.field)}
                     onGameButtonPressed={this.onGameButtonPressed}
                     onMenuButtonPressed={this.onMenuButtonPressed} />
-                
+
                 <Minefield zoomLevel={this.state.zoomLevel} maxZoomLevel={2.5} field={this.props.game.field} status={this.props.game.game.status} onCellClick={this.handleCellClick} onCellAltClick={this.handleCellAltClick} />
-                <Slider minimumValue={1} maximumValue={2.5} step={0.25} value={this.state.zoomLevel} onValueChange={(newValue) => { this.setState({zoomLevel: newValue}) } } />
+                <Slider minimumValue={1}
+                    maximumValue={2.5}
+                    value={this.state.zoomLevel}
+                    trackStyle={sliderStyles.track}
+                    thumbStyle={sliderStyles.thumb}
+                    minimumTrackTintColor={BORDER2_COLOR}
+                    onValueChange={(newValue) => { this.setState({ zoomLevel: newValue }) }} />
                 {this.gameScoreReady() && <View style={styles.winSection}>
                     <GameText style={styles.winMessage}>Completed in {formatGameTime(this.props.lastScore.score, 2)}s</GameText>
                     {this.isHighScore() && <GameText style={styles.highscoreMessage}>New high score!</GameText>}
@@ -206,5 +214,25 @@ const styles = StyleSheet.create({
     highscoreMessage: {
         color: 'red',
         textAlign: 'center'
+    }
+});
+
+const sliderStyles = StyleSheet.create({
+    track: {
+        height: 6,
+        borderRadius: 1,
+        backgroundColor: BORDER2_COLOR,
+    },
+    thumb: {
+        width: 20,
+        height: 30,
+        backgroundColor: BG_MAIN_COLOR,
+        borderWidth: 3,
+        borderStyle: 'solid',
+        borderRadius: 1,
+        borderLeftColor: BORDER1_COLOR,
+        borderTopColor: BORDER1_COLOR,
+        borderRightColor: BORDER2_COLOR,
+        borderBottomColor: BORDER2_COLOR,
     }
 });

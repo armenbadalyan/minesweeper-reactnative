@@ -5,11 +5,11 @@ import { GameStatus } from '../modules/game';
 import TextureManager from '../shared/texture-manager';
 import {
     View,
-    ScrollView,
     AppState,
     TouchableWithoutFeedback,
     StyleSheet
 } from 'react-native';
+import PanView from './PanView';
 import commonStyles from '../shared/styles.js';
 import { BG_MAIN_COLOR } from '../constants';
 
@@ -155,7 +155,6 @@ export default class Minefield extends PureComponent {
         this.gl = gl;
 
         TextureManager.loadTextures(gl, textures).then(() => {
-            console.log('TextureManager.loadTextures');
             this.texturesLoaded = true;
             this.createShaders();
             this.renderField(this.props.field, this.props.status);
@@ -362,7 +361,6 @@ export default class Minefield extends PureComponent {
     }
 
     unloadTextures = () => {
-        console.log('unloadTextures');
         TextureManager.unloadTextures(this.gl, textures);
         this.texturesLoaded = false;
     }
@@ -392,7 +390,6 @@ export default class Minefield extends PureComponent {
     }
 
     render() {
-        console.log('render', this.state.viewWidth, this.state.viewHeight);
         if (this.state.viewWidth && this.state.viewHeight) {
             const rows = this.props.field.rows,
                 cols = this.props.field.cols;
@@ -404,15 +401,9 @@ export default class Minefield extends PureComponent {
             this.unscaledFieldWidth = this.cellSize * cols;
             this.unscaledFieldHeight = this.cellSize * rows;
 
-            console.log(this.cellSize, this.cellScaledSize, this.fieldWidth, this.fieldHeight, this.unscaledFieldWidth, this.unscaledFieldHeight);
-
             const fieldStyles = StyleSheet.create({
-                scrollVDimensions: {
+                scrollDimensions: {
                     width: this.unscaledFieldWidth,
-                    height: this.unscaledFieldHeight
-                },
-                scrollHDimensions: {
-                    width: this.fieldWidth,
                     height: this.unscaledFieldHeight
                 },
                 fieldContainer: {
@@ -429,17 +420,14 @@ export default class Minefield extends PureComponent {
                 this.renderField(this.props.field, this.props.status);
             }           
 
-            return <View style={commonStyles.border} onLayout={this.handleLayoutChange} >
-
-                <ScrollView style={fieldStyles.scrollVDimensions} >
-                    <ScrollView style={fieldStyles.fieldHDimensions} horizontal>
+            return <View style={commonStyles.border} onLayout={this.handleLayoutChange} >                
+                    <PanView style={fieldStyles.scrollDimensions}>
                         <TouchableWithoutFeedback onPress={this.onFieldPress} onLongPress={this.onFieldLongPress}>
                             <View style={fieldStyles.fieldContainer}>
                                 {this.state.appState === 'active' ? <WebGLView style={fieldStyles.fieldDimensions} onContextCreate={this.onContextCreate} /> : null}
                             </View>
                         </TouchableWithoutFeedback>
-                    </ScrollView>
-                </ScrollView>
+                    </PanView>            
 
                 {!this.state.gameFieldReady && <View style={styles.fieldOverlay} />}
             </View>;

@@ -11,10 +11,11 @@ const persistConfig = {
   whitelist: ['score', 'preferences']
 }
 
-const persistedReducer = persistReducer(persistConfig, rootReducer)
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+const middleware = __DEV__ ? [thunkMiddleware, createLogger()] : [thunkMiddleware]; 
 
 const store = createStore(
-  persistedReducer, applyMiddleware(thunkMiddleware, createLogger()));
+  persistedReducer, applyMiddleware(...middleware));
 
 export default store;
 export let storeReady = new Promise(resolve => {

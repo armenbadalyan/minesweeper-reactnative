@@ -4,7 +4,7 @@
  * @flow
  */
 import React from 'react';
-import { NetInfo } from 'react-native';
+import { NetInfo, StatusBar, View } from 'react-native';
 import { StackNavigator } from 'react-navigation';
 import { Provider } from 'react-redux';
 import store from './modules/store';
@@ -14,7 +14,8 @@ import MainScreen from './screens/main/MainScreen';
 import GameScreen from './screens/game/GameScreen';
 import LeaderboardScreen from './screens/leaderboard/LeaderboardScreen';
 import { connectivityAvailable } from './shared/connection';
-import MessageQueue from 'react-native/Libraries/BatchedBridge/MessageQueue.js';
+import { BG_MAIN_COLOR } from './constants';
+//import MessageQueue from 'react-native/Libraries/BatchedBridge/MessageQueue.js';
 
 const RootStack = StackNavigator(
     {
@@ -39,7 +40,15 @@ const RootStack = StackNavigator(
 bootstrap();
 
 export default function App() {
-    return <Provider store={store}><RootStack /></Provider>;
+    return <Provider store={store}>
+        <View style={{flex: 1}}>
+            <StatusBar
+                backgroundColor={BG_MAIN_COLOR}
+                barStyle="light-content"
+            />
+            <RootStack />
+        </View>
+    </Provider>;
 }
 
 async function bootstrap() {
@@ -58,9 +67,9 @@ async function loginAndSyncGameData() {
         await syncOfflineScore();
         await subscribeToScoreUpdates();
     }
-    catch(err) {
+    catch (err) {
         console.log(err)
-    }    
+    }
 }
 
 function syncAfterNetworkChange() {
@@ -92,8 +101,9 @@ function syncOfflineScore() {
     return store.dispatch(submitOfflineScores());
 }
 
-const spyFunction = (msg) => {
+/*const spyFunction = (msg) => {
     console.log(msg);
-  };
-  
-  //MessageQueue.spy(spyFunction);
+};
+
+MessageQueue.spy(spyFunction);
+*/

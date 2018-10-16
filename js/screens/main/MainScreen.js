@@ -76,7 +76,7 @@ export class MainScreen extends Component {
                 <Button title="BEGINNER" onPress={this.startBeginnerGame} style={styles.button} />
                 <Button title="INTERMEDIATE" onPress={this.startIntermediateGame} style={styles.button} />
                 <Button title="LEADERBOARD" style={styles.button} onPress={this.navigateToLeaderboard} />
-                {this.props.auth.user && <Button title="SIGN OUT" style={styles.button} onPress={this.props.signOut} />}
+                {this.props.auth.user && __DEV__ && <Button title="SIGN OUT" style={styles.button} onPress={this.props.signOut} />}
             </View>
             <View style={[styles.row, styles['row-flex-1']]}>
                 {!!scoreList.length && <HighScores scores={scoreList} />}

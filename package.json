@@ -13,7 +13,7 @@
     "react-native": "0.55.3",
     "react-native-firebase": "^4.2.0",
     "react-native-modal-dropdown": "^0.6.2",
-    "react-native-slider": "^0.11.0",
+    "react-native-orientation-locker": "^1.0.18",
     "react-native-webgl": "^0.8.0",
     "react-navigation": "^1.5.11",
     "react-redux": "^5.0.7",

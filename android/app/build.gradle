@@ -138,6 +138,7 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-orientation-locker')
     implementation 'com.android.support:multidex:1.0.3'
     implementation(project(':react-native-firebase')) {
         transitive = false

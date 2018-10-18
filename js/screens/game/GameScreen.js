@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { connect } from 'react-redux';
-import { initGame, cellClick, cellAltClick, convertToMines, GameStatus } from '../../modules/game';
+import Orientation from 'react-native-orientation-locker';
+import { initGame, cellClick, cellAltClick, convertToMines, GameStatus, GameOrientation } from '../../modules/game';
 import { updateProfile } from '../../modules/auth';
 import { aknowledgeUserModal } from '../../modules/preferences';
 import StatBoard from '../../components/StatBoard';
@@ -17,8 +18,9 @@ import { BG_MAIN_COLOR, BORDER1_COLOR, BORDER2_COLOR } from '../../constants';
 const mapStateToProps = state => ({
     user: state.auth.user,
     preferences: state.preferences,
-    game: state.game,
+    game: state.game,    
     status: state.game.game.status,
+    orientation: state.game.displaySettings.orientation,
     lastScore: state.score.lastScore,
     bestScore: state.score.bestScore
 });
@@ -59,6 +61,10 @@ export class GameScreen extends Component {
 
     componentDidMount() {
         this.startGameWithOptions(this.props.navigation.getParam('gameOptions'));
+    }
+
+    componentWillUnmount() {
+        Orientation.lockToPortrait();
     }
 
     async componentDidUpdate(prevProps) {
@@ -130,8 +136,7 @@ export class GameScreen extends Component {
     }
 
     render() {
-        const screenDimensions = Dimensions.get('screen');
-        const isLandscape = screenDimensions.width > screenDimensions.height;
+        const isLandscape = this.props.orientation === GameOrientation.LANDSCAPE;
         return (
             <View style={[styles.game, ...(isLandscape ? [styles.gameLandscape] : [])]}>
                 <StatBoard
@@ -175,12 +180,14 @@ export default connect(mapStateToProps, mapDispatchToProps)(GameScreen);
 GameScreen.propTypes = {
     game: PropTypes.shape({
         game: PropTypes.object,
-        field: PropTypes.object
+        field: PropTypes.object,
+        displaySettings: PropTypes.object
     }),
     lastScore: PropTypes.shape({
         score: PropTypes.number
     }),
     status: PropTypes.string,
+    orientation: PropTypes.oneOf(GameOrientation.PORTRAIT, GameOrientation.LANDSCAPE),
     user: PropTypes.shape({
         displayName: PropTypes.string
     }),
@@ -256,7 +263,7 @@ const sliderStyles = StyleSheet.create({
     trackVertical: {
         width: 6
     },
-    thumb: {        
+    thumb: {
         backgroundColor: BG_MAIN_COLOR,
         borderWidth: 3,
         borderStyle: 'solid',

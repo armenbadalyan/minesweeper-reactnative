@@ -7,6 +7,7 @@ import React from 'react';
 import { NetInfo, StatusBar, View } from 'react-native';
 import { StackNavigator } from 'react-navigation';
 import { Provider } from 'react-redux';
+import Orientation from 'react-native-orientation-locker';
 import store from './modules/store';
 import { restoreAuthentication } from './modules/auth';
 import { restoreScore, submitOfflineScores } from './modules/score';
@@ -55,6 +56,7 @@ export default function App() {
 }
 
 async function bootstrap() {
+    Orientation.lockToPortrait();
     if (await connectivityAvailable()) {
         await loginAndSyncGameData();
         syncAfterNetworkChange();

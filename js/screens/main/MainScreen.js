@@ -2,8 +2,9 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { View, Image, StyleSheet } from 'react-native';
+import Orientation from 'react-native-orientation-locker';
 import { signOut } from '../../modules/auth';
-import { DifficultyLevel } from '../../modules/game';
+import { DifficultyLevel, fieldSettings, GameOrientation } from '../../modules/game';
 import Button from '../../components/Button';
 import HighScores from '../../components/HighScores';
 import { BG_MAIN_COLOR } from '../../constants';
@@ -48,6 +49,13 @@ export class MainScreen extends Component {
     }
 
     navigateToGameScreen(options) {
+        if (fieldSettings[options.difficulty].orientation === GameOrientation.LANDSCAPE) {
+            Orientation.lockToLandscape();    
+        }
+        else {
+            Orientation.lockToPortrait();
+        }
+        
         this.props.navigation.navigate('Game', {
             gameOptions: options
         });

@@ -3,6 +3,7 @@ package io.mobilefront.minesweeper;
 import android.support.multidex.MultiDexApplication;
 
 import com.facebook.react.ReactApplication;
+import org.wonday.orientation.OrientationPackage;
 import io.invertase.firebase.RNFirebasePackage;
 import io.invertase.firebase.auth.RNFirebaseAuthPackage;
 import io.invertase.firebase.firestore.RNFirebaseFirestorePackage;
@@ -27,6 +28,7 @@ public class MainApplication extends MultiDexApplication implements ReactApplica
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new OrientationPackage(),
             new RNFirebasePackage(),
             new RNFirebaseAuthPackage(),
             new RNFirebaseFirestorePackage(),

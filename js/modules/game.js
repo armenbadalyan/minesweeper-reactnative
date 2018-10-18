@@ -19,21 +19,29 @@ export const DifficultyLevel = {
     EXPERT: 'expert'
 }
 
-const fieldSettings = {
+export const GameOrientation = {
+    PORTRAIT: 'portrait',
+    LANDSCAPE: 'landscape'
+}
+
+export const fieldSettings = {
     [DifficultyLevel.BEGINNER]: {
         rows: 8,
         cols: 8,
-        mines: 10
+        mines: 10,
+        orientation: GameOrientation.PORTRAIT
     },
     [DifficultyLevel.INTERMEDIATE]: {
         rows: 16,
         cols: 16,
-        mines: 40
+        mines: 40,
+        orientation: GameOrientation.PORTRAIT
     },
     [DifficultyLevel.EXPERT]: {
         rows: 16,
         cols: 30,
-        mines: 99
+        mines: 99,
+        orientation: GameOrientation.LANDSCAPE
     }}
 
 
@@ -50,6 +58,10 @@ const initialState = {
         rows: 0,
         cols: 0,
         cells: {}
+    },
+    displaySettings: {
+        zoomLevel: 1,
+        orientation: GameOrientation.PORTRAIT
     }
 };
 
@@ -87,9 +99,10 @@ export default (state = initialState, action) => {
                     startedAt: 0,
                     finishedAt: 0,
                     totalMines: payload.mines,
-                    difficulty: payload.difficulty
+                    difficulty: payload.difficulty,
                 },
-                field: payload.field
+                field: payload.field,
+                displaySettings: payload.displaySettings
             }
         case UPDATE_GAME:
             return {
@@ -124,6 +137,10 @@ export function initGame(difficulty) {
             payload: {
                 mines,
                 field: getCleanField(settings.rows, settings.cols),
+                displaySettings: {
+                    zoomLevel: 1,
+                    orientation: settings.orientation
+                },
                 difficulty
             }
         }

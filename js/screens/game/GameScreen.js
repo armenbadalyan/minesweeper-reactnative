@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Dimensions } from 'react-native';
 import { connect } from 'react-redux';
-import Slider from "react-native-slider";
 import { initGame, cellClick, cellAltClick, convertToMines, GameStatus } from '../../modules/game';
 import { updateProfile } from '../../modules/auth';
 import { aknowledgeUserModal } from '../../modules/preferences';
@@ -10,9 +9,10 @@ import StatBoard from '../../components/StatBoard';
 import Minefield from '../../components/Minefield';
 import GameText from '../../components/GameText';
 import UserIDModal from '../../components/UserIDModal';
+import Slider from '../../components/Slider';
 import { formatGameTime } from '../../shared/time-utils';
 import { connectivityAvailable } from '../../shared/connection';
-import { BG_MAIN_COLOR, BG_ALT_COLOR, BORDER1_COLOR, BORDER2_COLOR } from '../../constants';
+import { BG_MAIN_COLOR, BORDER1_COLOR, BORDER2_COLOR } from '../../constants';
 
 const mapStateToProps = state => ({
     user: state.auth.user,
@@ -130,22 +130,31 @@ export class GameScreen extends Component {
     }
 
     render() {
+        const screenDimensions = Dimensions.get('screen');
+        const isLandscape = screenDimensions.width > screenDimensions.height;
         return (
-            <View style={styles.game}>
+            <View style={[styles.game, ...(isLandscape ? [styles.gameLandscape] : [])]}>
                 <StatBoard
+                    style={styles.statboard}
+                    isVertical={isLandscape}
                     game={this.props.game.game}
                     flaggedMines={this.countFlaggedMines(this.props.game.field)}
                     onGameButtonPressed={this.onGameButtonPressed}
                     onMenuButtonPressed={this.onMenuButtonPressed} />
 
-                <Minefield zoomLevel={this.state.zoomLevel} maxZoomLevel={2.5} field={this.props.game.field} status={this.props.game.game.status} onCellClick={this.handleCellClick} onCellAltClick={this.handleCellAltClick} />
-                <Slider minimumValue={1}
-                    maximumValue={2.5}
+                <Minefield style={isLandscape ? styles.minefieldVertical : styles.minefieldHorizontal} zoomLevel={this.state.zoomLevel} maxZoomLevel={2} field={this.props.game.field} status={this.props.game.game.status} onCellClick={this.handleCellClick} onCellAltClick={this.handleCellAltClick} />
+
+                <Slider
+                    style={isLandscape ? sliderStyles.sliderVertical : sliderStyles.sliderHorizontal}
+                    orientation={isLandscape ? 'vertical' : 'horizontal'}
+                    minimumValue={1}
+                    maximumValue={2}
                     value={this.state.zoomLevel}
-                    trackStyle={sliderStyles.track}
-                    thumbStyle={sliderStyles.thumb}
+                    trackStyle={[sliderStyles.track, isLandscape ? sliderStyles.trackVertical : sliderStyles.trackHorizontal]}
+                    thumbStyle={[sliderStyles.thumb, isLandscape ? sliderStyles.thumbVertical : sliderStyles.thumbHorizontal]}
                     minimumTrackTintColor={BORDER2_COLOR}
                     onValueChange={(newValue) => { this.setState({ zoomLevel: newValue }) }} />
+
                 {this.gameScoreReady() && <View style={styles.winSection}>
                     <GameText style={styles.winMessage}>Completed in {formatGameTime(this.props.lastScore.score, 2)}s</GameText>
                     {this.isHighScore() && <GameText style={styles.highscoreMessage}>New high score!</GameText>}
@@ -192,12 +201,23 @@ GameScreen.propTypes = {
 
 const styles = StyleSheet.create({
     game: {
-        flex: 1,
         borderWidth: 12,
-        borderColor: '#C0C0C0',
+        borderColor: BG_MAIN_COLOR,
         borderStyle: 'solid',
-        backgroundColor: '#C0C0C0'
-
+        backgroundColor: BG_MAIN_COLOR
+    },
+    gameLandscape: {
+        flexDirection: 'row',
+        alignItems: 'flex-start'
+    },
+    statboard: {
+        alignSelf: 'stretch'
+    },
+    minefieldHorizontal: {
+        alignSelf: 'stretch'
+    },
+    minefieldVertical: {
+        flex: 1
     },
     winSection: {
         width: '100%',
@@ -218,14 +238,25 @@ const styles = StyleSheet.create({
 });
 
 const sliderStyles = StyleSheet.create({
-    track: {
-        height: 6,
-        borderRadius: 1,
-        backgroundColor: BORDER2_COLOR,
+    sliderHorizontal: {
+        height: 40,
+        width: '100%'
     },
-    thumb: {
-        width: 20,
-        height: 30,
+    sliderVertical: {
+        width: 40,
+        height: '100%'
+    },
+    track: {
+        borderRadius: 1,
+        backgroundColor: BORDER2_COLOR
+    },
+    trackHorizontal: {
+        height: 6
+    },
+    trackVertical: {
+        width: 6
+    },
+    thumb: {        
         backgroundColor: BG_MAIN_COLOR,
         borderWidth: 3,
         borderStyle: 'solid',
@@ -234,5 +265,13 @@ const sliderStyles = StyleSheet.create({
         borderTopColor: BORDER1_COLOR,
         borderRightColor: BORDER2_COLOR,
         borderBottomColor: BORDER2_COLOR,
+    },
+    thumbHorizontal: {
+        width: 20,
+        height: 30,
+    },
+    thumbVertical: {
+        width: 30,
+        height: 20,
     }
 });

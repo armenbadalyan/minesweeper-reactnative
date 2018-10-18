@@ -7,12 +7,14 @@ import {
     View,
     AppState,
     TouchableWithoutFeedback,
-    StyleSheet
+    StyleSheet,
+    ViewPropTypes as RNViewPropTypes
 } from 'react-native';
 import PanView from './PanView';
 import commonStyles from '../shared/styles.js';
 import { BG_MAIN_COLOR } from '../constants';
 
+const ViewPropTypes = RNViewPropTypes || View.propTypes;
 const FIELD_BORDER_WIDTH = 6;
 const textures = [{
     name: 'field_assets',
@@ -418,9 +420,9 @@ export default class Minefield extends PureComponent {
 
             if (this.state.gameFieldReady) {
                 this.renderField(this.props.field, this.props.status);
-            }           
+            }
 
-            return <View style={commonStyles.border} onLayout={this.handleLayoutChange} >                
+            return <View style={[commonStyles.border, this.props.style]} onLayout={this.handleLayoutChange} >                
                     <PanView style={fieldStyles.scrollDimensions}>
                         <TouchableWithoutFeedback onPress={this.onFieldPress} onLongPress={this.onFieldLongPress}>
                             <View style={fieldStyles.fieldContainer}>
@@ -433,7 +435,7 @@ export default class Minefield extends PureComponent {
             </View>;
         }
         else {
-            return <View style={commonStyles.border} onLayout={this.handleLayoutChange} />;
+            return <View style={[commonStyles.border, this.props.style]} onLayout={this.handleLayoutChange} />;
         }
     }
 }
@@ -447,6 +449,7 @@ Minefield.propTypes = {
     zoomLevel: PropTypes.number,
     maxZoomLevel: PropTypes.number,
     status: PropTypes.string,
+    style: ViewPropTypes.style,
     onCellClick: PropTypes.func,
     onCellAltClick: PropTypes.func
 }

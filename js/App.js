@@ -33,6 +33,9 @@ const RootStack = StackNavigator(
         initialRouteName: 'Main',
         navigationOptions: {
             header: null
+        },
+        cardStyle: {
+            backgroundColor: BG_MAIN_COLOR
         }
     }
 );

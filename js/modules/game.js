@@ -23,7 +23,7 @@ const fieldSettings = {
     [DifficultyLevel.BEGINNER]: {
         rows: 8,
         cols: 8,
-        mines: 5
+        mines: 10
     },
     [DifficultyLevel.INTERMEDIATE]: {
         rows: 16,

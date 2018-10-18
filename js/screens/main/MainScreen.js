@@ -23,7 +23,8 @@ const mapDispatchToProps = dispatch => ({
 
 const highScoreLabels = {
     [DifficultyLevel.BEGINNER]: 'Bgnr',
-    [DifficultyLevel.INTERMEDIATE]: 'Intrm'
+    [DifficultyLevel.INTERMEDIATE]: 'Intrm',
+    [DifficultyLevel.EXPERT]: 'Xprt'
 }
 
 export class MainScreen extends Component {
@@ -37,6 +38,12 @@ export class MainScreen extends Component {
     startIntermediateGame = () => {
         this.navigateToGameScreen({
             difficulty: DifficultyLevel.INTERMEDIATE
+        });
+    }
+
+    startExpertGame = () => {
+        this.navigateToGameScreen({
+            difficulty: DifficultyLevel.EXPERT
         })
     }
 
@@ -75,6 +82,7 @@ export class MainScreen extends Component {
             <View style={styles.row}>
                 <Button title="BEGINNER" onPress={this.startBeginnerGame} style={styles.button} />
                 <Button title="INTERMEDIATE" onPress={this.startIntermediateGame} style={styles.button} />
+                <Button title="EXPERT" onPress={this.startExpertGame} style={styles.button} />
                 <Button title="LEADERBOARD" style={styles.button} onPress={this.navigateToLeaderboard} />
                 {this.props.auth.user && __DEV__ && <Button title="SIGN OUT" style={styles.button} onPress={this.props.signOut} />}
             </View>

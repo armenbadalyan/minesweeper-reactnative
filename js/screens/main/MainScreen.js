@@ -67,10 +67,11 @@ export class MainScreen extends Component {
 
     getListOfScores(bestScore) {
         return Object.values(DifficultyLevel).map(level => {
-            if (bestScore[level]) {
+            const bestScoreForLevel = bestScore[level];
+            if (bestScoreForLevel) {
                 return {
                     label: highScoreLabels[level] || '',
-                    score: bestScore.beginner ? formatGameTime(bestScore.beginner.score, 2) : 'NA'
+                    score: bestScoreForLevel ? formatGameTime(bestScoreForLevel.score, 2) : 'NA'
                 }
             }
             else {

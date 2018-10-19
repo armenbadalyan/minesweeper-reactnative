@@ -3,6 +3,7 @@ import firebase from 'react-native-firebase';
 // Actions
 
 import { SIGN_OUT } from './auth';
+import { DifficultyLevel } from './game';
 
 export const UPDATE_BEST_SCORE = 'score/UPDATE_BEST_SCORE';
 export const SET_SCORE_SUBMITTED = 'score/SET_SCORE_SUBMITTED';
@@ -117,12 +118,14 @@ export function saveScore(score, difficulty) {
 export function restoreScore() {
     return (dispatch, getState) => {
         const user = getState().auth.user;
-        console.log('restoreScore');
         if (user) {
             return firebase.firestore()
                 .collection('scores_overall')
                 .where('user.uid', '==', user.uid)
                 .onSnapshot((snapshot) => {
+                    let levelsToRestore = Object.values(DifficultyLevel);
+
+                    // loop through server best scores and update the store
                     snapshot.forEach(doc => {
                         const {score, difficulty, timestamp} = doc.data();
                         dispatch({
@@ -133,6 +136,17 @@ export function restoreScore() {
                                     timestamp,
                                     submitted: true
                                 }
+                            }
+                        });
+                        levelsToRestore.splice(levelsToRestore.indexOf(difficulty), 1);
+                    });
+
+                    // loop through remaining scores and set them to null in the store
+                    levelsToRestore.forEach(difficulty => {
+                        dispatch({
+                            type: UPDATE_BEST_SCORE,
+                            payload: {
+                                [difficulty]: null
                             }
                         });
                     });
@@ -151,7 +165,6 @@ export function submitOfflineScores() {
         const submissions = Object.keys(bestScore)
             .filter(difficulty => bestScore[difficulty] !== null && !bestScore[difficulty].submitted)
             .map(difficulty => {
-                console.log(bestScore[difficulty]);
                 return dispatch(submitScore(bestScore[difficulty], difficulty));
             });
 

@@ -35,7 +35,8 @@ const mapDispatchToProps = dispatch => ({
 
 const levels = [
 	{ id: DifficultyLevel.BEGINNER, name: 'Beginner' },
-	{ id: DifficultyLevel.INERMEDIATE, name: 'Intermediate' }
+	{ id: DifficultyLevel.INTERMEDIATE, name: 'Intermediate' },
+	{ id: DifficultyLevel.EXPERT, name: 'Expert' }
 ];
 
 const periods = [

@@ -4,6 +4,7 @@ import { saveScore } from './score';
 
 const INIT_GAME = 'game/INIT_GAME';
 const UPDATE_GAME = 'game/UPDATE_GAME';
+const SET_ZOOM = 'game/SET_ZOOM';
 
 
 export const GameStatus = {
@@ -114,6 +115,14 @@ export default (state = initialState, action) => {
                     finishedAt: payload.finishedAt
                 },
                 field: payload.field
+            }
+        case SET_ZOOM:
+            return {
+                ...state,
+                displaySettings: {
+                    ...state.displaySettings,
+                    zoomLevel: payload
+                }
             }
         default:
             return state;
@@ -242,6 +251,13 @@ export function convertToMines() {
             }
         }
     };
+}
+
+export function setZoomLevel(level) {
+    return {
+        type: SET_ZOOM,
+        payload: level
+    }
 }
 
 function getCleanField(rows, cols) {

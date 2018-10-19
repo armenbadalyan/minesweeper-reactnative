@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { View, StyleSheet } from 'react-native';
 import { connect } from 'react-redux';
 import Orientation from 'react-native-orientation-locker';
-import { initGame, cellClick, cellAltClick, convertToMines, GameStatus, GameOrientation } from '../../modules/game';
+import { initGame, cellClick, cellAltClick, convertToMines, setZoomLevel, GameStatus, GameOrientation } from '../../modules/game';
 import { updateProfile } from '../../modules/auth';
 import { aknowledgeUserModal } from '../../modules/preferences';
 import StatBoard from '../../components/StatBoard';
@@ -19,6 +19,7 @@ const mapStateToProps = state => ({
     game: state.game,    
     status: state.game.game.status,
     orientation: state.game.displaySettings.orientation,
+    zoomLevel: state.game.displaySettings.zoomLevel,
     lastScore: state.score.lastScore,
     bestScore: state.score.bestScore
 });
@@ -41,12 +42,13 @@ const mapDispatchToProps = dispatch => ({
     },
     aknowledgeUserModal: () => {
         dispatch(aknowledgeUserModal());
+    },
+    setZoomLevel: zoomLevel => {
+        dispatch(setZoomLevel(zoomLevel));
     }
 });
 
 export class GameScreen extends Component {
-
-    state = { zoomLevel: 1 }
 
     constructor(props) {
         super(props);
@@ -145,18 +147,25 @@ export class GameScreen extends Component {
                     onGameButtonPressed={this.onGameButtonPressed}
                     onMenuButtonPressed={this.onMenuButtonPressed} />
 
-                <Minefield style={isLandscape ? styles.minefieldVertical : styles.minefieldHorizontal} zoomLevel={this.state.zoomLevel} maxZoomLevel={2} field={this.props.game.field} status={this.props.game.game.status} onCellClick={this.handleCellClick} onCellAltClick={this.handleCellAltClick} />
+                <Minefield 
+                    style={isLandscape ? styles.minefieldVertical : styles.minefieldHorizontal} 
+                    zoomLevel={this.props.zoomLevel} 
+                    maxZoomLevel={2} 
+                    field={this.props.game.field} 
+                    status={this.props.game.game.status} 
+                    onCellClick={this.handleCellClick} 
+                    onCellAltClick={this.handleCellAltClick} />
 
                 <Slider
                     style={isLandscape ? sliderStyles.sliderVertical : sliderStyles.sliderHorizontal}
                     orientation={isLandscape ? 'vertical' : 'horizontal'}
                     minimumValue={1}
                     maximumValue={2}
-                    value={this.state.zoomLevel}
+                    value={this.props.zoomLevel}
                     trackStyle={[sliderStyles.track, isLandscape ? sliderStyles.trackVertical : sliderStyles.trackHorizontal]}
                     thumbStyle={[sliderStyles.thumb, isLandscape ? sliderStyles.thumbVertical : sliderStyles.thumbHorizontal]}
                     minimumTrackTintColor={BORDER2_COLOR}
-                    onValueChange={(newValue) => { this.setState({ zoomLevel: newValue }) }} />
+                    onValueChange={(newValue) => { this.props.setZoomLevel(newValue) }} />
 
                 <UserIDModal ref={ref => this.modal = ref}
                     defaultValue={this.props.user && this.props.user.displayName}
@@ -180,6 +189,7 @@ GameScreen.propTypes = {
     }),
     status: PropTypes.string,
     orientation: PropTypes.oneOf(GameOrientation.PORTRAIT, GameOrientation.LANDSCAPE),
+    zoomLevel: PropTypes.number,
     user: PropTypes.shape({
         displayName: PropTypes.string
     }),
@@ -195,7 +205,8 @@ GameScreen.propTypes = {
     convertToMines: PropTypes.func,
     initGame: PropTypes.func,
     updateProfile: PropTypes.func,
-    aknowledgeUserModal: PropTypes.func
+    aknowledgeUserModal: PropTypes.func,
+    setZoomLevel: PropTypes.func
 }
 
 const styles = StyleSheet.create({

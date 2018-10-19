@@ -8,10 +8,8 @@ import { updateProfile } from '../../modules/auth';
 import { aknowledgeUserModal } from '../../modules/preferences';
 import StatBoard from '../../components/StatBoard';
 import Minefield from '../../components/Minefield';
-import GameText from '../../components/GameText';
 import UserIDModal from '../../components/UserIDModal';
 import Slider from '../../components/Slider';
-import { formatGameTime } from '../../shared/time-utils';
 import { connectivityAvailable } from '../../shared/connection';
 import { BG_MAIN_COLOR, BORDER1_COLOR, BORDER2_COLOR } from '../../constants';
 
@@ -160,12 +158,6 @@ export class GameScreen extends Component {
                     minimumTrackTintColor={BORDER2_COLOR}
                     onValueChange={(newValue) => { this.setState({ zoomLevel: newValue }) }} />
 
-                {this.gameScoreReady() && <View style={styles.winSection}>
-                    <GameText style={styles.winMessage}>Completed in {formatGameTime(this.props.lastScore.score, 2)}s</GameText>
-                    {this.isHighScore() && <GameText style={styles.highscoreMessage}>New high score!</GameText>}
-                </View>
-                }
-
                 <UserIDModal ref={ref => this.modal = ref}
                     defaultValue={this.props.user && this.props.user.displayName}
                     onSubmit={this.onSubmitUser} />
@@ -225,22 +217,6 @@ const styles = StyleSheet.create({
     },
     minefieldVertical: {
         flex: 1
-    },
-    winSection: {
-        width: '100%',
-        flex: 1,
-        flexDirection: 'column',
-        flexWrap: 'nowrap',
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
-    winMessage: {
-        color: 'green',
-        textAlign: 'center'
-    },
-    highscoreMessage: {
-        color: 'red',
-        textAlign: 'center'
     }
 });
 

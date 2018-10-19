@@ -422,7 +422,7 @@ export default class Minefield extends PureComponent {
                 this.renderField(this.props.field, this.props.status);
             }
 
-            return <View style={[commonStyles.border, this.props.style]} onLayout={this.handleLayoutChange} >                
+            return <View style={[commonStyles.border, this.props.style, {opacity: this.state.gameFieldReady ? 1 : 0}]} onLayout={this.handleLayoutChange} >                
                     <PanView style={fieldStyles.scrollDimensions}>
                         <TouchableWithoutFeedback onPress={this.onFieldPress} onLongPress={this.onFieldLongPress}>
                             <View style={fieldStyles.fieldContainer}>
@@ -430,8 +430,6 @@ export default class Minefield extends PureComponent {
                             </View>
                         </TouchableWithoutFeedback>
                     </PanView>            
-
-                {!this.state.gameFieldReady && <View style={styles.fieldOverlay} />}
             </View>;
         }
         else {

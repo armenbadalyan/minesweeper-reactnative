@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 import PanView from './PanView';
 import commonStyles from '../shared/styles.js';
-import { BG_MAIN_COLOR } from '../constants';
 
 const ViewPropTypes = RNViewPropTypes || View.propTypes;
 const FIELD_BORDER_WIDTH = 6;
@@ -451,7 +450,3 @@ Minefield.propTypes = {
     onCellClick: PropTypes.func,
     onCellAltClick: PropTypes.func
 }
-
-const styles = StyleSheet.create({
-    fieldOverlay: { top: 0, left: 0, right: 0, bottom: 0, backgroundColor: BG_MAIN_COLOR, position: 'absolute' }
-});

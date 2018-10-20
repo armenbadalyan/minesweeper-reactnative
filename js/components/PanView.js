@@ -75,7 +75,7 @@ export default class PanView extends Component {
                 left: this.state.viewX
             }
         });
-        return <View style={this.props.style} {...this._panResponder.panHandlers} onLayout={this.onViewLayout}>
+        return <View style={[styles.view, this.props.style]} {...this._panResponder.panHandlers} onLayout={this.onViewLayout}>
             <View style={[styles.childWrapper, viewPosition.topLeft]} onLayout={this.onChildLayout}>
                 {this.props.children}
             </View>
@@ -84,6 +84,9 @@ export default class PanView extends Component {
 }
 
 const styles = StyleSheet.create({
+    view: {
+        overflow: 'hidden'
+    },
     childWrapper: {
         position: 'absolute',
     }

@@ -1,7 +1,7 @@
-const blacklist = require('metro/src/blacklist');
+const blacklist = require('metro-config/src/defaults/blacklist')
 
 module.exports = {
-    getBlacklistRE: function () {
-        return blacklist([/cloud-functions\/.*/]);
+    resolver: {
+        blacklistRE: blacklist([/cloud-functions\/.*/])
     }
 };

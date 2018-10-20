@@ -254,7 +254,7 @@ const sliderStyles = StyleSheet.create({
         backgroundColor: BG_MAIN_COLOR,
         borderWidth: 3,
         borderStyle: 'solid',
-        borderRadius: 1,
+        borderRadius: 0,
         borderLeftColor: BORDER1_COLOR,
         borderTopColor: BORDER1_COLOR,
         borderRightColor: BORDER2_COLOR,

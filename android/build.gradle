@@ -1,6 +1,13 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
+    ext {
+        buildToolsVersion = "27.0.3"
+        minSdkVersion = 17
+        compileSdkVersion = 27
+        targetSdkVersion = 27
+        supportLibVersion = "27.1.1"
+    }
     repositories {   
         maven { url 'https://maven.google.com' }           
         mavenLocal()
@@ -15,7 +22,7 @@ buildscript {
         google() 
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.2'
+        classpath 'com.android.tools.build:gradle:3.1.4'
         classpath 'de.undercouch:gradle-download-task:3.1.2'
         classpath 'com.google.gms:google-services:3.2.1'        
 
@@ -35,4 +42,20 @@ allprojects {
         }
         google()
     }
+}
+
+subprojects { 
+     afterEvaluate { 
+         project -> if (project.hasProperty("android")) { 
+             android { 
+                compileSdkVersion 27 
+                buildToolsVersion '27.0.3' 
+             } 
+         } 
+     } 
+ }
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.4'
+    distributionUrl = distributionUrl.replace("bin", "all")
 }

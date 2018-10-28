@@ -1,10 +1,16 @@
 {
-    "branch": "master",
+    "branch": "develop",
     "plugins": [
+        [
+            "@semantic-release/exec",
+            {
+                "prepareCmd": "npm version ${nextRelease.version} --git-tag-version=false"
+            }
+        ],
         "@semantic-release/commit-analyzer",
         "@semantic-release/release-notes-generator",
         "@semantic-release/git"
     ],
-    "dryRun": true,
+    "dryRun": false,
     "ci": false
 }

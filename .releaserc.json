@@ -1,5 +1,5 @@
 {
-    "branch": "develop",
+    "branch": "master",
     "plugins": [
         [
             "@semantic-release/exec",
@@ -12,5 +12,5 @@
         "@semantic-release/git"
     ],
     "dryRun": false,
-    "ci": false
+    "ci": true
 }

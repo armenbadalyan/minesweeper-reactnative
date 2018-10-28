@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node node_modules/react-native/local-cli/cli.js start",
+    "commitmsg": "commitlint -E HUSKY_GIT_PARAMS",
     "test": "jest"
   },
   "dependencies": {
@@ -23,15 +24,22 @@
     "redux-thunk": "^2.2.0"
   },
   "devDependencies": {
+    "@commitlint/cli": "^7.2.1",
+    "@commitlint/config-conventional": "^7.1.2",
+    "@semantic-release/commit-analyzer": "^6.1.0",
+    "@semantic-release/git": "^7.0.5",
+    "@semantic-release/release-notes-generator": "^7.1.2",
     "babel-eslint": "^8.2.3",
     "babel-jest": "^19.0.0",
     "eslint": "^4.19.1",
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-react": "^7.7.0",
     "eslint-plugin-react-native": "^3.2.1",
+    "husky": "^1.1.2",
     "jest": "^19.0.2",
     "metro-react-native-babel-preset": "^0.45.6",
-    "react-test-renderer": "^16.5.2"
+    "react-test-renderer": "^16.5.2",
+    "semantic-release": "^15.10.6"
   },
   "jest": {
     "preset": "react-native",
@@ -44,7 +52,9 @@
     "transformIgnorePatterns": [
       "node_modules/(?!(jest-)?react-native|react-navigation)"
     ],
-    "setupFiles": ["./jest/setup.js"]
+    "setupFiles": [
+      "./jest/setup.js"
+    ]
   },
   "rnpm": {
     "assets": [

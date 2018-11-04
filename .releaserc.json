@@ -4,7 +4,7 @@
         [
             "@semantic-release/exec",
             {
-                "prepareCmd": "npm version ${nextRelease.version} --git-tag-version=false"
+                "prepareCmd": "npm version ${nextRelease.version} --git-tag-version=false && envman add --key NEW_APP_VERSION --value ${nextRelease.version}"
             }
         ],
         "@semantic-release/commit-analyzer",

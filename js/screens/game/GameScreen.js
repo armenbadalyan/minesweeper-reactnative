@@ -158,13 +158,14 @@ export class GameScreen extends Component {
 
                 <Slider
                     style={isLandscape ? sliderStyles.sliderVertical : sliderStyles.sliderHorizontal}
-                    orientation={isLandscape ? 'vertical' : 'horizontal'}
+                    orientation={isLandscape  ? 'vertical' : 'horizontal'}
                     minimumValue={1}
                     maximumValue={2}
                     value={this.props.zoomLevel}
                     trackStyle={[sliderStyles.track, isLandscape ? sliderStyles.trackVertical : sliderStyles.trackHorizontal]}
                     thumbStyle={[sliderStyles.thumb, isLandscape ? sliderStyles.thumbVertical : sliderStyles.thumbHorizontal]}
                     minimumTrackTintColor={BORDER2_COLOR}
+                    maximumTrackTintColor={BORDER2_COLOR}
                     onValueChange={(newValue) => { this.props.setZoomLevel(newValue) }} />
 
                 <UserIDModal ref={ref => this.modal = ref}
@@ -241,8 +242,7 @@ const sliderStyles = StyleSheet.create({
         height: '100%'
     },
     track: {
-        borderRadius: 1,
-        backgroundColor: BORDER2_COLOR
+        borderRadius: 1
     },
     trackHorizontal: {
         height: 6

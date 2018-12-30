@@ -327,6 +327,26 @@ export default class Slider extends Component {
         return <Animated.View style={positionStyle} pointerEvents="none" />;
     }
 
+    getMinimumTrackStyles(thumbStart) {
+        const { thumbSize, trackSize } = this.state;
+        const { minimumTrackTintColor } = this.props; 
+        var minimumTrackStyle = {
+            position: 'absolute',                        
+            backgroundColor: minimumTrackTintColor,
+        };
+        
+        if (this.props.orientation === 'vertical') {
+            minimumTrackStyle.height = Animated.add(thumbStart, thumbSize.height / 2);
+            minimumTrackStyle.marginLeft = -trackSize.width;
+        }
+        else {
+            minimumTrackStyle.width = Animated.add(thumbStart, thumbSize.width / 2);
+            minimumTrackStyle.marginTop = -trackSize.height;
+        }
+
+        return minimumTrackStyle;
+    }
+
     getThumbPositionStyles(thumbStart) {
         if (this.props.orientation === 'vertical') {
             return [                
@@ -361,7 +381,6 @@ export default class Slider extends Component {
         var {
             value,
             containerSize,
-            trackSize,
             thumbSize,
             allMeasured,
         } = this.state;
@@ -379,11 +398,9 @@ export default class Slider extends Component {
         }
 
         var minimumTrackStyle = {
-            position: 'absolute',
-            width: Animated.add(thumbStart, thumbSize.width / 2),
-            marginTop: -trackSize.height,
-            backgroundColor: minimumTrackTintColor,
+            ...this.getMinimumTrackStyles(thumbStart),
             ...valueVisibleStyle,
+            backgroundColor: minimumTrackTintColor
         };
 
         const thumbStyleTransform = (thumbStyle && thumbStyle.transform) || [];
@@ -398,11 +415,11 @@ export default class Slider extends Component {
                 onLayout={this.measureContainer.bind(this)}
             >
                 <View
-                    style={StyleSheet.flatten([
-                        { backgroundColor: maximumTrackTintColor },
+                    style={StyleSheet.flatten([                        
                         mainStyles.track,
                         orientation === 'vertical' ? mainStyles.trackVertical : mainStyles.trackHorizontal,
                         trackStyle,
+                        { backgroundColor: maximumTrackTintColor }
                     ])}
                     onLayout={this.measureTrack.bind(this)}
                 />

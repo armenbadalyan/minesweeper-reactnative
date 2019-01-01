@@ -2,7 +2,8 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import {
   Image,
-  StyleSheet
+  StyleSheet,
+  ViewPropTypes
 } from 'react-native';
 
 export default class Icon extends PureComponent {
@@ -32,7 +33,7 @@ Icon.propTypes = {
 	source: PropTypes.oneOf(PropTypes.string, PropTypes.number),
 	width: PropTypes.number,
 	height: PropTypes.number,
-	style: PropTypes.number,
+	style: ViewPropTypes.style,
 	externalSource: PropTypes.bool
 }
 

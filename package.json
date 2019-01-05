@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node node_modules/react-native/local-cli/cli.js start",
     "commitmsg": "commitlint -E HUSKY_GIT_PARAMS",
-    "postversion": "react-native-version --skip-tag",
+    "postversion": "react-native-version --skip-tag --never-amend",
     "test": "jest"
   },
   "dependencies": {

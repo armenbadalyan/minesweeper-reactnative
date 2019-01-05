@@ -60,7 +60,7 @@ export class MainScreen extends Component {
         }        
         
         if (delayNavTillOrientationLocked) {
-            // TODO: this is not a reliable way to prevent navigation before orientatio change
+            // TODO: this is not a reliable way to prevent navigation before orientation change
             setTimeout(() => {
                 this.props.navigation.navigate('Game', {
                     gameOptions: options

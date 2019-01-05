@@ -65,6 +65,8 @@ export class GameScreen extends Component {
 
     componentWillUnmount() {
         Orientation.lockToPortrait();
+        // reset zoom level when leaving the game
+        this.props.setZoomLevel(1);
     }
 
     async componentDidUpdate(prevProps) {

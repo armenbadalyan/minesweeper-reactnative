@@ -5,6 +5,7 @@
   "scripts": {
     "start": "node node_modules/react-native/local-cli/cli.js start",
     "commitmsg": "commitlint -E HUSKY_GIT_PARAMS",
+    "postversion": "react-native-version --skip-tag",
     "test": "jest"
   },
   "dependencies": {
@@ -39,6 +40,7 @@
     "husky": "^1.1.2",
     "jest": "^19.0.2",
     "metro-react-native-babel-preset": "^0.45.6",
+    "react-native-version": "^2.6.6",
     "react-test-renderer": "^16.5.2",
     "semantic-release": "^15.10.6"
   },

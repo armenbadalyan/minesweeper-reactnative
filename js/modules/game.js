@@ -103,7 +103,10 @@ export default (state = initialState, action) => {
                     difficulty: payload.difficulty,
                 },
                 field: payload.field,
-                displaySettings: payload.displaySettings
+                displaySettings: {
+                    ...state.displaySettings,
+                    ...payload.displaySettings
+                }
             }
         case UPDATE_GAME:
             return {
@@ -147,7 +150,6 @@ export function initGame(difficulty) {
                 mines,
                 field: getCleanField(settings.rows, settings.cols),
                 displaySettings: {
-                    zoomLevel: 1,
                     orientation: settings.orientation
                 },
                 difficulty

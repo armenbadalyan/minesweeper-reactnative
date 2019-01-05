@@ -92,6 +92,7 @@ export default class Minefield extends PureComponent {
     gl = null;
     texturesLoaded = false;
     program;
+    uSampler;
 
     constructor(props) {
         super(props);
@@ -231,10 +232,13 @@ export default class Minefield extends PureComponent {
         gl.attachShader(this.program, fragmentShader);
         gl.linkProgram(this.program);
         gl.useProgram(this.program);
-
+        this.program.aVertexPosition = gl.getAttribLocation(this.program, "aVertexPosition");
+        this.program.textureCoord = gl.getAttribLocation(this.program, "aTexCoord");
+        this.uSampler = gl.getUniformLocation(this.program, "t");
     }
 
     renderField(field, status) {
+        
         const gl = this.gl;
         const program = this.program;
 
@@ -278,7 +282,6 @@ export default class Minefield extends PureComponent {
 
             // vertex position attribute
             gl.bindBuffer(gl.ARRAY_BUFFER, vbuffer);
-            program.aVertexPosition = gl.getAttribLocation(program, "aVertexPosition");
             gl.enableVertexAttribArray(program.aVertexPosition);
             gl.vertexAttribPointer(program.aVertexPosition, itemSize, gl.FLOAT, false, 0, 0);
 
@@ -289,22 +292,19 @@ export default class Minefield extends PureComponent {
             gl.enableVertexAttribArray(program.color);*/
 
             // texture coordinate attribute
-            gl.bindBuffer(gl.ARRAY_BUFFER, textureBuffer);
-            program.textureCoord = gl.getAttribLocation(program, "aTexCoord");
+            gl.bindBuffer(gl.ARRAY_BUFFER, textureBuffer);           
             gl.vertexAttribPointer(program.textureCoord, 2, gl.FLOAT, false, 0, 0);
             gl.enableVertexAttribArray(program.textureCoord);
-
-            const uSampler = gl.getUniformLocation(program, "t");
 
             // map the texture
             gl.activeTexture(gl.TEXTURE0);
             gl.bindTexture(gl.TEXTURE_2D, TextureManager.getTexture('field_assets'));
-            gl.uniform1i(uSampler, 0);
+            gl.uniform1i(this.uSampler, 0);
 
-            gl.drawArrays(gl.TRIANGLES, 0, numItems);
-
+            gl.drawArrays(gl.TRIANGLES, 0, numItems);          
+            
             const rngl = this.gl.getExtension("RN");
-            rngl.endFrame();
+            rngl.endFrame();            
         }
     }
 

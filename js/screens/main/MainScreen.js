@@ -49,16 +49,30 @@ export class MainScreen extends Component {
     }
 
     navigateToGameScreen(options) {
+        let delayNavTillOrientationLocked;
         if (fieldSettings[options.difficulty].orientation === GameOrientation.LANDSCAPE) {
             Orientation.lockToLandscape();    
+            delayNavTillOrientationLocked = true;
         }
         else {
             Orientation.lockToPortrait();
-        }
+            delayNavTillOrientationLocked = false;
+        }        
         
-        this.props.navigation.navigate('Game', {
-            gameOptions: options
-        });
+        if (delayNavTillOrientationLocked) {
+            // TODO: this is not a reliable way to prevent navigation before orientation change
+            setTimeout(() => {
+                this.props.navigation.navigate('Game', {
+                    gameOptions: options
+                });
+            }, 200);
+        }
+        else {
+            this.props.navigation.navigate('Game', {
+                gameOptions: options
+            });
+        }       
+        
     }
 
     navigateToLeaderboard = () => {

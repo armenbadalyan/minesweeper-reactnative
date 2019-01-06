@@ -1,4 +1,4 @@
-package io.mobilefront.minesweeper;
+package io.mobilefront.bombsweeper;
 
 import com.facebook.react.ReactActivity;
 import android.content.Intent;

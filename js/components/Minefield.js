@@ -423,7 +423,7 @@ export default class Minefield extends PureComponent {
 
             return <View style={[commonStyles.border, this.props.style, {opacity: this.state.gameFieldReady ? 1 : 0}]} onLayout={this.handleLayoutChange} >                
                     <PanView style={fieldStyles.scrollDimensions}>
-                        <TouchableWithoutFeedback onPress={this.onFieldPress} onLongPress={this.onFieldLongPress}>
+                        <TouchableWithoutFeedback delayLongPress={300} onPress={this.onFieldPress} onLongPress={this.onFieldLongPress}>
                             <View style={fieldStyles.fieldContainer}>
                                 {this.state.appState === 'active' ? <WebGLView style={fieldStyles.fieldDimensions} onContextCreate={this.onContextCreate} /> : null}
                             </View>

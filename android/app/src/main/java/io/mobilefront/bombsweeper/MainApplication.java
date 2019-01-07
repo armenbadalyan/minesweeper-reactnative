@@ -1,4 +1,4 @@
-package io.mobilefront.minesweeper;
+package io.mobilefront.bombsweeper;
 
 import android.support.multidex.MultiDexApplication;
 

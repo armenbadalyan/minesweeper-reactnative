@@ -36,7 +36,6 @@ const RootStack = StackNavigator(
         navigationOptions: {
             header: null
         },
-        cardShadowEnabled: false,
         cardStyle: {
             backgroundColor: BG_MAIN_COLOR,
             shadowColor: 'transparent'
@@ -48,8 +47,7 @@ bootstrap();
 
 export default function App() {
     return <Provider store={store}>
-        <View style={{flex: 1}}>
-            
+        <View style={{flex: 1}}>            
             <StatusBar
                 backgroundColor={BG_MAIN_COLOR}
                 barStyle="light-content"

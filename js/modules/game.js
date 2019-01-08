@@ -1,3 +1,4 @@
+import { Vibration } from 'react-native';
 import { saveScore } from './score';
 
 // Actions
@@ -228,6 +229,8 @@ export function cellAltClick(id) {
                     [cell.id]: setCellAttribute(cell, 'flagged', !cell.flagged)
                 }
             };
+
+            Vibration.vibrate(200);
 
             dispatch({
                 type: UPDATE_GAME,

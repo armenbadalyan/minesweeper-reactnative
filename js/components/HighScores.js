@@ -12,7 +12,7 @@ export default function HighScores(props) {
                 {scores.map(s => {
                     return <View key={s.label} style={styles.scoreColumn}>
                         <GameText>{s.label}</GameText>
-                        <GameText>{s.score}</GameText>
+                        <GameText style={styles.scoreLabel}>{s.score}</GameText>
                     </View>
                 })}
             </View>
@@ -44,6 +44,8 @@ const styles = StyleSheet.create({
     scoreColumn: {
         flex: 1,
         alignItems: 'center'
+    },
+    scoreLabel: {
+        paddingTop: 5
     }
-
 });

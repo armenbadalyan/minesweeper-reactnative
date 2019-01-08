@@ -219,7 +219,8 @@ const styles = StyleSheet.create({
 		padding: 10
 	},
 	headerText: {
-		fontSize: 10
+		fontSize: 10,
+		paddingBottom: 5
 	},
 	leaderboard: {
 		flex: 1

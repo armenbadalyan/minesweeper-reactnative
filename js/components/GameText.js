@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Text, StyleSheet } from 'react-native';
+import { Text, StyleSheet, Platform } from 'react-native';
 
 export default function GameText(props) {
     const {children, style, ...ownProps} = props;
@@ -14,6 +14,7 @@ GameText.propTypes = {
 
 const styles = StyleSheet.create({
     ownStyle: {
-        fontFamily: 'PressStart2P-Regular'
+        fontFamily: 'PressStart2P-Regular',
+        includeFontPadding: false
     }
 });

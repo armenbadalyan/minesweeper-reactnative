@@ -59,3 +59,9 @@ service-account.json
 
 cloud-functions/functions
 
+# ios/Pods,
+ios/Pods/
+
+# Podfile versions
+ios/Podfile.lock
+

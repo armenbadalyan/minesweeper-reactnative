@@ -4,13 +4,14 @@
  * @flow
  */
 import React from 'react';
-import { NetInfo, StatusBar, View } from 'react-native';
+import { NetInfo, View } from 'react-native';
 import { StackNavigator } from 'react-navigation';
 import { Provider } from 'react-redux';
 import Orientation from 'react-native-orientation-locker';
 import store from './modules/store';
 import { restoreAuthentication } from './modules/auth';
 import { restoreScore, submitOfflineScores } from './modules/score';
+import StatusBar from './components/BackgroundStatusBar'; 
 import MainScreen from './screens/main/MainScreen';
 import GameScreen from './screens/game/GameScreen';
 import LeaderboardScreen from './screens/leaderboard/LeaderboardScreen';
@@ -35,8 +36,10 @@ const RootStack = StackNavigator(
         navigationOptions: {
             header: null
         },
+        cardShadowEnabled: false,
         cardStyle: {
-            backgroundColor: BG_MAIN_COLOR
+            backgroundColor: BG_MAIN_COLOR,
+            shadowColor: 'transparent'
         }
     }
 );
@@ -46,6 +49,7 @@ bootstrap();
 export default function App() {
     return <Provider store={store}>
         <View style={{flex: 1}}>
+            
             <StatusBar
                 backgroundColor={BG_MAIN_COLOR}
                 barStyle="light-content"

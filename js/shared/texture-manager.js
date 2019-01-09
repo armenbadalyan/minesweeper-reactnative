@@ -20,7 +20,7 @@ export default class TextureManager {
     static unloadTextures(gl, assets) {
         const rngl = gl.getExtension("RN");
         assets.forEach(asset => {    
-            rngl.unloadTexture(textureMap[asset.name].texture);
+            rngl.unloadTexture(textureMap.hasOwnProperty(asset.name) && textureMap[asset.name].texture);
             delete textureMap[asset.name];            
         });
     }

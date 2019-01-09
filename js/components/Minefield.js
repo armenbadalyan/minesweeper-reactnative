@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
+import { Platform } from 'react-native';
 import { WebGLView } from "react-native-webgl";
 import { GameStatus } from '../modules/game';
 import TextureManager from '../shared/texture-manager';
@@ -98,7 +99,7 @@ export default class Minefield extends PureComponent {
         super(props);
 
         this.state = {
-            appState: 'active',
+            glViewActive: true,
             gameFieldReady: false,
             viewWidth: 0,
             viewHeight: 0
@@ -170,12 +171,18 @@ export default class Minefield extends PureComponent {
     }
 
     onAppStateChanged = (nextAppState) => {
-        // when pausing unload textures to prevent black square/flickering problems after resume
-        if (nextAppState !== 'active') {
-            this.unloadTextures();
+        // Only on Android:
+        // when the app goes to background unload textures to prevent black square/flickering problems after resuming
+        console.log('onAppStateChanged', nextAppState);
+        if ( Platform.OS === 'android') {
+            if( nextAppState === 'background') {
+                this.unloadTextures();
+                this.setState({ glViewActive: false });
+            }
+            else {
+                this.setState({ glViewActive: true });
+            }
         }
-
-        this.setState({ appState: nextAppState });
     }
 
     initField() {
@@ -425,7 +432,7 @@ export default class Minefield extends PureComponent {
                     <PanView style={fieldStyles.scrollDimensions}>
                         <TouchableWithoutFeedback delayLongPress={300} onPress={this.onFieldPress} onLongPress={this.onFieldLongPress}>
                             <View style={fieldStyles.fieldContainer}>
-                                {this.state.appState === 'active' ? <WebGLView style={fieldStyles.fieldDimensions} onContextCreate={this.onContextCreate} /> : null}
+                                {this.state.glViewActive ? <WebGLView style={fieldStyles.fieldDimensions} onContextCreate={this.onContextCreate} /> : null}
                             </View>
                         </TouchableWithoutFeedback>
                     </PanView>            

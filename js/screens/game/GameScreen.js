@@ -3,7 +3,14 @@ import PropTypes from 'prop-types';
 import { View, StyleSheet } from 'react-native';
 import { connect } from 'react-redux';
 import Orientation from 'react-native-orientation-locker';
-import { initGame, cellClick, cellAltClick, convertToMines, setZoomLevel, GameStatus, GameOrientation } from '../../modules/game';
+import {
+  initGame,
+  cellAction,
+  setZoomLevel,
+  toggleFlagMode,
+  GameStatus,
+  GameOrientation
+} from '../../modules/game';
 import { updateProfile } from '../../modules/auth';
 import { aknowledgeUserModal } from '../../modules/preferences';
 import StatBoard from '../../components/StatBoard';
@@ -20,8 +27,9 @@ const mapStateToProps = state => ({
     status: state.game.game.status,
     orientation: state.game.displaySettings.orientation,
     zoomLevel: state.game.displaySettings.zoomLevel,
+    flagMode: state.game.displaySettings.flagMode,
     lastScore: state.score.lastScore,
-    bestScore: state.score.bestScore
+    bestScore: state.score.bestScore    
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -29,13 +37,10 @@ const mapDispatchToProps = dispatch => ({
         dispatch(initGame(difficulty));
     },
     cellClick: (id) => {
-        dispatch(cellClick(id))
+        dispatch(cellAction(id, false))
     },
     cellAltClick: (id) => {
-        dispatch(cellAltClick(id))
-    },
-    convertToMines: () => {
-        dispatch(convertToMines());
+        dispatch(cellAction(id, true))
     },
     updateProfile: (displayName) => {
         dispatch(updateProfile(displayName));
@@ -45,19 +50,13 @@ const mapDispatchToProps = dispatch => ({
     },
     setZoomLevel: zoomLevel => {
         dispatch(setZoomLevel(zoomLevel));
+    },
+    toggleFlagMode: () => {
+        dispatch(toggleFlagMode());
     }
 });
 
 export class GameScreen extends Component {
-
-    constructor(props) {
-        super(props);
-
-        this.handleCellClick = this.handleCellClick.bind(this);
-        this.handleCellAltClick = this.handleCellAltClick.bind(this);
-        this.onGameButtonPressed = this.onGameButtonPressed.bind(this);
-        this.onMenuButtonPressed = this.onMenuButtonPressed.bind(this);
-    }
 
     componentDidMount() {
         this.startGameWithOptions(this.props.navigation.getParam('gameOptions'));
@@ -87,24 +86,24 @@ export class GameScreen extends Component {
             }, 0);
     }
 
-    onGameButtonPressed() {
+    onGameButtonPressed = () => {
         this.startGameWithOptions(this.props.navigation.getParam('gameOptions'));
     }
 
-    onMenuButtonPressed() {
+    onMenuButtonPressed = () => {
         this.props.navigation.goBack();
     }
 
-    handleCellClick(id) {
+    onFlagButtonPressed = () => {
+        this.props.toggleFlagMode();
+    }
+
+    handleCellClick = (id) => {
         this.props.cellClick(id);
     }
 
-    handleCellAltClick(id) {
+    handleCellAltClick = (id) => {
         this.props.cellAltClick(id);
-    }
-
-    handleConvertToMines = () => {
-        this.props.convertToMines();
     }
 
     startGameWithOptions(options) {
@@ -145,9 +144,11 @@ export class GameScreen extends Component {
                     style={styles.statboard}
                     isVertical={isLandscape}
                     game={this.props.game.game}
+                    flagMode={this.props.flagMode}
                     flaggedMines={this.countFlaggedMines(this.props.game.field)}
                     onGameButtonPressed={this.onGameButtonPressed}
-                    onMenuButtonPressed={this.onMenuButtonPressed} />
+                    onMenuButtonPressed={this.onMenuButtonPressed}
+                    onFlagButtonPressed={this.onFlagButtonPressed} />
 
                 <Minefield 
                     style={isLandscape ? styles.minefieldVertical : styles.minefieldHorizontal} 
@@ -193,6 +194,7 @@ GameScreen.propTypes = {
     status: PropTypes.string,
     orientation: PropTypes.oneOf(GameOrientation.PORTRAIT, GameOrientation.LANDSCAPE),
     zoomLevel: PropTypes.number,
+    flagMode: PropTypes.bool,
     user: PropTypes.shape({
         displayName: PropTypes.string
     }),
@@ -205,11 +207,11 @@ GameScreen.propTypes = {
     }),
     cellClick: PropTypes.func,
     cellAltClick: PropTypes.func,
-    convertToMines: PropTypes.func,
     initGame: PropTypes.func,
     updateProfile: PropTypes.func,
     aknowledgeUserModal: PropTypes.func,
-    setZoomLevel: PropTypes.func
+    setZoomLevel: PropTypes.func,
+    toggleFlagMode: PropTypes.func
 }
 
 const styles = StyleSheet.create({

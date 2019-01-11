@@ -39,7 +39,7 @@ Icon.propTypes = {
 
 const styles = StyleSheet.create({
 	icon: {
-		flex:1,
+		flex: 1,
 		width: '100%',
 		height: '100%'
 	}

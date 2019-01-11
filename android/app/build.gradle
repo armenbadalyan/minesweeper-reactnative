@@ -100,6 +100,7 @@ android {
 
     defaultConfig {
         applicationId "io.mobilefront.bombsweeper"
+        applicationIdSuffix ""
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 3
@@ -118,6 +119,9 @@ android {
         }
     }
     buildTypes {
+        debug {
+            applicationIdSuffix "dev"
+        }
         release {
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"

@@ -14,4 +14,4 @@ Install necessary tools as described at https://facebook.github.io/react-native/
 
 or
 
-`react-native run-android`
+`react-native run-android --appIdSuffix=dev`

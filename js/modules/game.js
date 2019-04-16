@@ -3,9 +3,12 @@ import { saveScore } from './score';
 
 // Actions
 
-const INIT_GAME = 'game/INIT_GAME';
-const UPDATE_GAME = 'game/UPDATE_GAME';
-const SET_ZOOM = 'game/SET_ZOOM';
+export const INIT_GAME = 'game/INIT_GAME';
+export const START_GAME = 'game/START_GAME';
+export const UPDATE_GAME = 'game/UPDATE_GAME';
+export const FINISH_GAME = 'game/FINISH_GAME';
+export const SET_ZOOM = 'game/SET_ZOOM';
+export const TOGGLE_FLAG_MODE = 'preferences/TOGGLE_FLAG_MODE';
 
 
 export const GameStatus = {
@@ -63,7 +66,8 @@ const initialState = {
     },
     displaySettings: {
         zoomLevel: 1,
-        orientation: GameOrientation.PORTRAIT
+        orientation: GameOrientation.PORTRAIT,
+        flagMode: false
     }
 };
 
@@ -109,16 +113,28 @@ export default (state = initialState, action) => {
                     ...payload.displaySettings
                 }
             }
-        case UPDATE_GAME:
+        case START_GAME:
             return {
                 ...state,
                 game: {
                     ...state.game,
-                    status: payload.status,
-                    startedAt: payload.startedAt,
-                    finishedAt: payload.finishedAt
-                },
-                field: payload.field
+                    status: GameStatus.IN_PROGRESS,
+                    startedAt: payload                    
+                }
+            }
+        case UPDATE_GAME:
+            return {
+                ...state,
+                field: payload
+            }
+        case FINISH_GAME:
+            return {
+                ...state,
+                game: {
+                    ...state.game,
+                    finishedAt: payload.finishedAt,
+                    status: payload.status
+                }
             }
         case SET_ZOOM:
             return {
@@ -128,6 +144,14 @@ export default (state = initialState, action) => {
                     zoomLevel: payload
                 }
             }
+        case TOGGLE_FLAG_MODE:
+            return {
+                ...state,
+                displaySettings: {
+                    ...state.displaySettings,
+                    flagMode: !state.displaySettings.flagMode
+                }
+            }
         default:
             return state;
 
@@ -135,7 +159,32 @@ export default (state = initialState, action) => {
 }
 
 
-// action creators
+// action creators and thunks
+
+export function startGame() {
+    return {
+        type: START_GAME,
+        payload: global.nativePerformanceNow()
+    }
+}
+
+export function updateField(newField) {
+    return {
+        type: UPDATE_GAME,
+        payload: newField
+    }
+}
+
+export function finishGame(finalStatus) {
+    return {
+        type: FINISH_GAME,
+        payload: {
+            finishedAt: global.nativePerformanceNow(),
+            status: finalStatus
+        }
+    }
+}
+
 
 export function initGame(difficulty) {
     const start = global.nativePerformanceNow();
@@ -151,7 +200,8 @@ export function initGame(difficulty) {
                 mines,
                 field: getCleanField(settings.rows, settings.cols),
                 displaySettings: {
-                    orientation: settings.orientation
+                    orientation: settings.orientation,
+                    flagMode: false
                 },
                 difficulty
             }
@@ -159,25 +209,55 @@ export function initGame(difficulty) {
     }    
 }
 
-export function cellClick(id) {
+export function cellAction(id, isAlternative) {
+    return (dispatch, getState) => {
+        const game = getState().game
+        const { flagMode } = game.displaySettings;
+        let action;
+
+        if (checkLostOrWon(game.game)) return;
+
+        if (isAlternative && flagMode) {
+            action = cellClick
+        }
+        else if (!isAlternative && !flagMode) {
+            action = cellClick
+        }
+        else {
+            action = cellAltClick
+        }
+        dispatch(action(id));        
+
+        if (isAlternative) {
+            Vibration.vibrate(200);
+        }
+    }
+}
+
+export function setZoomLevel(level) {
+    return {
+        type: SET_ZOOM,
+        payload: level
+    }
+}
+
+export function toggleFlagMode() {
+    return {
+        type: TOGGLE_FLAG_MODE
+    }
+}
+
+function cellClick(id) {
     return (dispatch, getState) => {
         const start = global.nativePerformanceNow(),
-            { game, field, game: { totalMines } } = getState().game;       
-            //cell = field.cells[id];
+            { game, field, game: { totalMines } } = getState().game;    
 
-        let newField = field,
-            startedAt = game.startedAt,
-            finishedAt = game.finishedAt,
-            newStatus;
-            
-        if (checkLostOrWon(game)) return;
+        let newField = field;
 
         if (checkFirstTap(game)) {
             newField = assignMineCountsToCells(plantMines(newField, totalMines, id));
-            startedAt = global.nativePerformanceNow();            
+            dispatch(startGame());        
         }
-        
-        newStatus = GameStatus.IN_PROGRESS;
 
         if (newField.cells[id].closed) {
             newField = openCell(id, newField);
@@ -185,41 +265,20 @@ export function cellClick(id) {
             newField = quickOpen(id, newField);
         }
 
-        newStatus = validateGameStatus(newField);
+        dispatch(finishGameIfNeeded(newField));      
 
-        if (newStatus === GameStatus.LOST) {
-            newField = findMistakesAndUncoverMines(newField);
-        }
-        else if (newStatus === GameStatus.WON) {
-            finishedAt = global.nativePerformanceNow();
-            newField = flagRemainingMines(newField);
-        }
         console.log('cell click', global.nativePerformanceNow() - start);
-
-        dispatch({
-            type: UPDATE_GAME,
-            payload: {
-                startedAt,
-                finishedAt,
-                status: newStatus,
-                field: newField
-            }
-        });
-
-        if (newStatus === GameStatus.WON) {
-            dispatch(saveScore(finishedAt - startedAt, game.difficulty));
-        }
     }
 }
 
-export function cellAltClick(id) {
+function cellAltClick(id) {
     return (dispatch, getState) => {
-        const { game, field } = getState().game,  
-            cell = field.cells[id];
+        const state = getState(),
+            { field } = state.game,  
+            cell = field.cells[id],
+            { flagMode } = state.preferences;      
 
         let newField;
-        
-        if (checkLostOrWon(game)) return;
 
         if (cell.closed) {
             newField = {
@@ -230,39 +289,39 @@ export function cellAltClick(id) {
                 }
             };
 
-            Vibration.vibrate(200);
-
-            dispatch({
-                type: UPDATE_GAME,
-                payload: {
-                    startedAt: game.startedAt,
-                    finishedAt: game.finishedAt,
-                    status: game.status,
-                    field: newField
-                }
-            });
-        }        
-    }
-}
-
-export function convertToMines() {
-    return {
-        type: UPDATE_GAME,
-        payload: {
-            field: {
-                rows: 16,
-                cols: 16,
-                cells: mines
-            }
+            dispatch(updateField(newField));
         }
-    };
+        else if (flagMode) {                
+            newField = quickOpen(id, field);   
+            dispatch(finishGameIfNeeded(newField));          
+        }
+    }
 }
 
-export function setZoomLevel(level) {
-    return {
-        type: SET_ZOOM,
-        payload: level
-    }
+function finishGameIfNeeded(field) {
+    return (dispatch) => {
+        let newStatus = getNextStatus(field),
+            newField = field;                        
+
+        if (newStatus === GameStatus.LOST) {
+            newField = findMistakesAndUncoverMines(newField);
+            dispatch(finishGame(newStatus));
+        }
+        else if (newStatus === GameStatus.WON) {
+            newField = flagRemainingMines(newField);
+            dispatch(finishGame(newStatus));                
+            dispatch(saveGameScore());
+        }
+
+        dispatch(updateField(newField));    
+    }    
+}
+
+function saveGameScore() {
+    return (dispatch, getState) => {
+        const { game } = getState().game;
+        dispatch(saveScore(game.finishedAt - game.startedAt, game.difficulty));
+    }   
 }
 
 function getCleanField(rows, cols) {
@@ -452,7 +511,7 @@ function quickOpen(cellId, field) {
     }
 }
 
-function validateGameStatus(field) {
+function getNextStatus(field) {
     const cellKeys = Object.keys(field.cells);
     const hasExploded = cellKeys.some(key => {
         return field.cells[key].exploded

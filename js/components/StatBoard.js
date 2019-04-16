@@ -9,6 +9,7 @@ import {
 import Timer from './Timer';
 import MineCounter from './MineCounter';
 import Icon from './Icon';
+import Button from './Button';
 import commonStyles from '../shared/styles';
 import faceWin from '../assets/face_win.png';
 import faceLost from '../assets/face_lost.png';
@@ -40,17 +41,14 @@ export default class StatBoard extends PureComponent {
 			this.props.style]}>
 			<Timer startedAt={this.props.game.startedAt} finishedAt={this.props.game.finishedAt} status={this.props.game.status} />
 			<View style={[styles.buttons, this.props.isVertical ? styles.buttonsVertical: styles.buttonsHorizontal]}>
+				<Button style={styles.iconButton} icon='list' onPress={this.props.onMenuButtonPressed} />
 				<TouchableHighlight onPress={this.props.onGameButtonPressed}>
 					<View style={styles.iconButton}>
 						<Icon source={buttonAsset} externalSource={true} width={40} height={40} />
 					</View>
-				</TouchableHighlight>
-				<TouchableHighlight onPress={this.props.onMenuButtonPressed}>
-					<View style={styles.iconButton}>
-						<Icon source='list' />
-					</View>
-				</TouchableHighlight>
-			</View>			
+				</TouchableHighlight>				
+				<Button style={styles.iconButton} selected={this.props.flagMode} icon='flag' onPress={this.props.onFlagButtonPressed} />
+			</View>		
 			<MineCounter minesRemaining={minesRemaining} />
 		</View>
 	}
@@ -65,9 +63,11 @@ StatBoard.propTypes = {
 	}),
 	isVertical: PropTypes.bool,
 	flaggedMines: PropTypes.number,
+	flagMode: PropTypes.bool,
 	style: ViewPropTypes.style,
 	onGameButtonPressed: PropTypes.func,
-	onMenuButtonPressed: PropTypes.func
+	onMenuButtonPressed: PropTypes.func,
+	onFlagButtonPressed: PropTypes.func
 }
 
 const styles = StyleSheet.create({
@@ -84,10 +84,13 @@ const styles = StyleSheet.create({
 		flexDirection: 'column'
 	},
 	buttons: {		
-		flexWrap: 'nowrap'
+		flex: 1,
+		flexWrap: 'nowrap',
+		justifyContent: 'space-around'
 	},
 	buttonsHorizontal: {
-		flexDirection: 'row'
+		flexDirection: 'row',
+		paddingHorizontal: '5%'		
 	},
 	buttonsVertical: {
 		flexDirection: 'column'

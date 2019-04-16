@@ -4,10 +4,9 @@ import { SIGN_OUT } from './auth';
 
 export const SET_USER_MODAL_AKNOWLEDGED = 'preferences/SET_USER_MODAL_AKNOWLEDGED';
 
-
 // default state
 const initialState = {
-    userModalAknowledged: false
+    userModalAknowledged: false    
 };
 
 

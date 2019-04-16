@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { View, Text, StyleSheet, TouchableWithoutFeedback } from 'react-native';
+import Icon from './Icon';
 import { BG_MAIN_COLOR, BG_ALT_COLOR, BORDER1_COLOR, BORDER2_COLOR } from '../constants';
 
 export default class Button extends Component {
@@ -23,16 +24,34 @@ export default class Button extends Component {
 
     render() {  
         const isPressed = this.props.selected || this.state.isPressed;
-        const button = (<View style={[styles.button, isPressed ? styles.buttonPressed : null, this.props.style]}>
-            <Text style={[styles.title, this.props.titleStyle]}>{this.props.title}</Text>
-        </View>);
+        const { icon } = this.props;
+
+        let buttonContent,
+            buttonElement;
+
+        if (icon) {
+            if (typeof icon === 'function') {
+                buttonContent = icon();
+            }
+            else {
+                buttonContent = <Icon source={icon} />
+            }
+        }
+        else {
+            buttonContent = <Text style={[styles.title, this.props.titleStyle]}>{this.props.title}</Text>
+        }
+
+        buttonElement = <View style={[styles.button, this.props.style, isPressed ? styles.buttonPressed : null]}>
+            {buttonContent}
+        </View>
+        
         if (this.props.touchable) {
             return (<TouchableWithoutFeedback onPressIn={this.onPressIn} onPressOut={this.onPressOut} onPress={this.props.onPress}>
-                { button }
+                { buttonElement }
             </TouchableWithoutFeedback>);
         }
         else {
-            return button;
+            return buttonElement;
         }
     } 
 }
@@ -76,5 +95,6 @@ Button.propTypes = {
     style: PropTypes.any,
     titleStyle: PropTypes.any,
     touchable: PropTypes.bool,
-    selected: PropTypes.bool
+    selected: PropTypes.bool,
+    icon: PropTypes.oneOfType([PropTypes.func, PropTypes.string]) 
 }

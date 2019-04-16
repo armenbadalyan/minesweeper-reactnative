@@ -8,6 +8,10 @@ buildscript {
         targetSdkVersion = 27
         supportLibVersion = "27.1.1"
     }
+    configurations {
+        all*.exclude group: 'com.google.firebase', module: 'firebase-core'
+        all*.exclude group: 'com.google.firebase', module: 'firebase-iid'
+    }
     repositories {   
         maven { url 'https://maven.google.com' }           
         mavenLocal()
